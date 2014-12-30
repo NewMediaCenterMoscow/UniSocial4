@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ServiceConfiguration serviceName="UniSocial4" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="4" osVersion="*" schemaVersion="2014-06.2.4">
+  <Role name="CollectorRole">
+    <Instances count="1" />
+    <ConfigurationSettings />
+  </Role>
+  <Role name="FrontendRole">
+    <Instances count="1" />
+    <ConfigurationSettings />
+  </Role>
+  <Role name="SaveResultRole">
+    <Instances count="1" />
+    <ConfigurationSettings />
+  </Role>
+  <Role name="TaskGeneratorRole">
+    <Instances count="1" />
+    <ConfigurationSettings />
+  </Role>
+</ServiceConfiguration>

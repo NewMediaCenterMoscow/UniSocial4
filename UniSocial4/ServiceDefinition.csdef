@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ServiceDefinition name="UniSocial4" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition" schemaVersion="2014-06.2.4">
+ <WorkerRole name="CollectorRole" vmsize="Small">
+  <Startup>
+   <Task executionContext="elevated" taskType="simple" commandLine="bin\ps.cmd ConfigureCloudService.ps1">
+    <Environment>
+     <Variable name="EMULATED">
+      <RoleInstanceValue xpath="/RoleEnvironment/Deployment/@emulated" />
+     </Variable>
+    </Environment>
+   </Task>
+  </Startup>
+  <Runtime>
+   <Environment>
+    <Variable name="EMULATED">
+     <RoleInstanceValue xpath="/RoleEnvironment/Deployment/@emulated" />
+    </Variable>
+   </Environment>
+   <EntryPoint>
+    <ProgramEntryPoint commandLine="bin\ps.cmd LaunchWorker.ps1" setReadyOnProcessStart="true" />
+   </EntryPoint>
+  </Runtime>
+ </WorkerRole>
+ <WebRole name="FrontendRole" vmsize="Small">
+  <Sites>
+   <Site name="Web">
+    <Bindings>
+     <Binding name="Endpoint1" endpointName="Endpoint1" />
+    </Bindings>
+   </Site>
+  </Sites>
+  <Endpoints>
+   <InputEndpoint name="Endpoint1" protocol="http" port="80" />
+  </Endpoints>
+  <Startup>
+   <Task executionContext="elevated" taskType="simple" commandLine="ps.cmd ConfigureCloudService.ps1">
+    <Environment>
+     <Variable name="EMULATED">
+      <RoleInstanceValue xpath="/RoleEnvironment/Deployment/@emulated" />
+     </Variable>
+    </Environment>
+   </Task>
+  </Startup>
+ </WebRole>
+ <WorkerRole name="SaveResultRole" vmsize="Small">
+  <Startup>
+   <Task executionContext="elevated" taskType="simple" commandLine="bin\ps.cmd ConfigureCloudService.ps1">
+    <Environment>
+     <Variable name="EMULATED">
+      <RoleInstanceValue xpath="/RoleEnvironment/Deployment/@emulated" />
+     </Variable>
+    </Environment>
+   </Task>
+  </Startup>
+  <Runtime>
+   <Environment>
+    <Variable name="EMULATED">
+     <RoleInstanceValue xpath="/RoleEnvironment/Deployment/@emulated" />
+    </Variable>
+   </Environment>
+   <EntryPoint>
+    <ProgramEntryPoint commandLine="bin\ps.cmd LaunchWorker.ps1" setReadyOnProcessStart="true" />
+   </EntryPoint>
+  </Runtime>
+ </WorkerRole>
+ <WorkerRole name="TaskGeneratorRole" vmsize="Small">
+  <Startup>
+   <Task executionContext="elevated" taskType="simple" commandLine="bin\ps.cmd ConfigureCloudService.ps1">
+    <Environment>
+     <Variable name="EMULATED">
+      <RoleInstanceValue xpath="/RoleEnvironment/Deployment/@emulated" />
+     </Variable>
+    </Environment>
+   </Task>
+  </Startup>
+  <Runtime>
+   <Environment>
+    <Variable name="EMULATED">
+     <RoleInstanceValue xpath="/RoleEnvironment/Deployment/@emulated" />
+    </Variable>
+   </Environment>
+   <EntryPoint>
+    <ProgramEntryPoint commandLine="bin\ps.cmd LaunchWorker.ps1" setReadyOnProcessStart="true" />
+   </EntryPoint>
+  </Runtime>
+ </WorkerRole>
+</ServiceDefinition>
