@@ -13,6 +13,8 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "SaveResultRole", "SaveResul
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "TaskGeneratorRole", "TaskGeneratorRole\TaskGeneratorRole.pyproj", "{C83A4B2B-D28E-418B-82A4-C88EDA6CB809}"
 EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "CommonLibs", "CommonLibs\CommonLibs.pyproj", "{DE10F61D-6D6F-4A6C-B8AF-D775E8A391E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,8 @@ Global
 		{C83A4B2B-D28E-418B-82A4-C88EDA6CB809}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C83A4B2B-D28E-418B-82A4-C88EDA6CB809}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C83A4B2B-D28E-418B-82A4-C88EDA6CB809}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE10F61D-6D6F-4A6C-B8AF-D775E8A391E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE10F61D-6D6F-4A6C-B8AF-D775E8A391E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

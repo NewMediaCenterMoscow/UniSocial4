@@ -8,12 +8,16 @@
     <ProjectHome>.</ProjectHome>
     <ProjectTypeGuids>{725071e1-96ae-4405-9303-1ba64eff6ebd};{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <StartupFile>worker.py</StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <SearchPath>..\CommonLibs\</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>TaskGeneratorRole</Name>
     <RootNamespace>TaskGeneratorRole</RootNamespace>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <IsWindowsApplication>False</IsWindowsApplication>
+    <InterpreterId>{9a7a9026-48c1-4688-9d5d-e5699d47d074}</InterpreterId>
+    <InterpreterVersion>3.4</InterpreterVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -24,6 +28,8 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="settings.py" />
+    <Compile Include="settings_local.py" />
     <Compile Include="worker.py" />
     <Content Include="bin\ConfigureCloudService.ps1" />
     <Content Include="bin\LaunchWorker.ps1" />
@@ -37,6 +43,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin" />
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="{9a7a9026-48c1-4688-9d5d-e5699d47d074}\3.4" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.Worker.targets" />
 </Project>

@@ -8,8 +8,7 @@
     <ProjectHome>.</ProjectHome>
     <ProjectTypeGuids>{e614c764-6d9e-4607-9337-b7073809a0bd};{1b580a1a-fdb3-4b32-83e1-6407eb2722e6};{349c5851-65df-11da-9384-00065b846f21};{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <StartupFile>app.py</StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <SearchPath>..\CommonLibs\</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <LaunchProvider>Web launcher</LaunchProvider>
     <OutputPath>.</OutputPath>
@@ -17,6 +16,9 @@
     <PythonWsgiHandler>{StartupModule}.wsgi_app()</PythonWsgiHandler>
     <Name>FrontendRole</Name>
     <RootNamespace>FrontendRole</RootNamespace>
+    <IsWindowsApplication>False</IsWindowsApplication>
+    <InterpreterId>{9a7a9026-48c1-4688-9d5d-e5699d47d074}</InterpreterId>
+    <InterpreterVersion>3.4</InterpreterVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -28,19 +30,38 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="app.py" />
+    <Compile Include="bottle_helpers.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="settings.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="settings_local.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bin" />
+    <Folder Include="views\" />
+    <Folder Include="static\" />
+    <Folder Include="static\images\" />
+    <Folder Include="static\scripts\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="requirements.txt" />
     <Content Include="bin\ConfigureCloudService.ps1" />
     <Content Include="bin\ps.cmd" />
+    <Content Include="views\base.html" />
+    <Content Include="views\tasks.html" />
+    <Content Include="views\tasks_add.html" />
   </ItemGroup>
   <ItemGroup>
     <None Include="bin\Readme.mht">
       <SubType>WebBrowser</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="{9a7a9026-48c1-4688-9d5d-e5699d47d074}\3.4" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.Web.targets" />
   <!-- Specify pre- and post-build commands in the BeforeBuild and 

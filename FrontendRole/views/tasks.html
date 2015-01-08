@@ -1,0 +1,32 @@
+﻿
+% rebase("base.html", title="Tasks")
+
+	<h1>Tasks</h1>
+
+	<ol>
+		% for task in tasks:
+		<li>{{ task['name'] }}</li>
+		% end
+	</ol>
+	<form action="{{ get_url('tasks_add')}}" method="post">
+		<fieldset>
+			<legend>Add new task</legend>
+
+			<label for="method">Method</label><br />
+			<input name="method" id="method" type="text" value="wall.get" /><br />
+
+			<label for="input">Dataset</label><br />
+			<!--<input name="input" id="input" type="text" /><br />-->
+			<select name="input" id="input">
+				% for dataset in datasets:
+				<option value="{{ dataset.name }}">{{ dataset.name }}</option>
+				% end
+			</select>
+			<br />
+			<input type="submit" value="Add" />
+
+		</fieldset>
+	</form>
+
+
+
