@@ -5,12 +5,12 @@ import hashlib
 from datetime import datetime
 import logging
 from time import sleep
+
 from azure.storage import CloudStorageAccount
 
 sys.path.insert(0, '../CommonLibs/')
 from storage_helper import create_storage_account, create_queues, get_queue_len
 from message_helper import decode_task_description_message, encode_task_message
-
 
 import settings
 
@@ -115,7 +115,6 @@ if __name__ == '__main__':
 
         for m in messages:
             message_handler(m)
-
 
         logging.info("working - " + str(num_messages))
         sleep(3.0)

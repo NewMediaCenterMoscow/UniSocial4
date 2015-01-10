@@ -25,6 +25,12 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CloudQueueStorage.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CloudStorageHelper.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="message_helper.py">
       <SubType>Code</SubType>
     </Compile>

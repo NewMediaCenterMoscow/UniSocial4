@@ -25,10 +25,9 @@ if '--debug' in sys.argv[1:] or 'SERVER_DEBUG' in os.environ:
     bottle.debug(True)
 
 
-# get data blobs
-storage_account = create_storage_account(settings.STORAGE_ACCOUNT_NAME, settings.STORAGE_ACCOUNT_KEY)
-blob_service = storage_account.create_blob_service()
-queue_service = storage_account.create_queue_service()
+storage_account = None
+blob_service = None
+queue_service = None
 
 
 @route('/', name='tasks')
@@ -64,6 +63,11 @@ def wsgi_app():
     return default_app()
 
 if __name__ == '__main__':
+
+    storage_account = create_storage_account(settings.STORAGE_ACCOUNT_NAME, settings.STORAGE_ACCOUNT_KEY)
+    blob_service = storage_account.create_blob_service()
+    queue_service = storage_account.create_queue_service()
+
     # Starts a local test server.
     HOST = os.environ.get('SERVER_HOST', 'localhost')
     try:

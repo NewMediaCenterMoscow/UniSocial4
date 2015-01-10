@@ -11,6 +11,11 @@ TEMP_BLOB_PATH = './data/'
 MAX_QUEUE_LEN = 512
 MIN_QUEUE_LEN = 50
 
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_DB = 0
+REDIS_PASSWORD = None
+
 # import local settings
 try:
     from settings_local import *
