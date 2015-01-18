@@ -9,20 +9,21 @@ from time import sleep
 from azure.storage import CloudStorageAccount
 
 sys.path.insert(0, '../CommonLibs/')
-from storage_helper import create_storage_account, create_queues, get_queue_len
-from message_helper import decode_task_description_message, encode_task_message
+from CloudStorageHelper import CloudStorageHelper
+from MessageHelper import MessageHelper
+
 
 import settings
 
 
 def message_handler(message):
-    queue_service.delete_message(settings.QUEUE_TASKS_DESCRIPTION, message.message_id, message.pop_receipt)
+    cloud_storage_helper.delete_message(settings.QUEUE_TASKS_DESCRIPTION, message.message_id, message.pop_receipt)
 
     # get task description
-    task = decode_task_description_message(message.message_text)
+    task = message_helper.parse_task_description_message(m.message_text)
     logging.info(task)
 
-    ## get blob etag
+    ## get blob modified time
     #blob_prop = blob_service.get_blob_properties(settings.BLOB_DATA_CONTAINER, task['input'])
     #blol_etag = datetime.strptime(blob_prop['last-modified'], '%a, %d %b %Y %H:%M:%S GMT').replace(tzinfo=pytz.UTC)
 
@@ -49,7 +50,7 @@ def message_handler(message):
     # check if file already exists
     filename = settings.TEMP_BLOB_PATH + task['input']
     if not os.path.exists(filename):
-        blob_service.get_blob_to_path(settings.BLOB_DATA_CONTAINER, task['input'], filename)
+        cloud_storage_helper.get_blob_to_path(settings.BLOB_DATA_CONTAINER, task['input'], filename)
 
     # count tasks
     task_count = 0
@@ -57,16 +58,16 @@ def message_handler(message):
     with open(filename, 'r') as file:
        for ids in file:
 
-           queue_message = encode_task_message( task['method'], ids.strip() )
-           queue_service.put_message(settings.QUEUE_TASKS, queue_message)
+           queue_message = message_helper.create_task_message(task['method'], ids.strip())
+           cloud_storage_helper.put_message(settings.QUEUE_TASKS, queue_message)
 
            # check task queue every 16th task
            if task_count % 16 == 0:
             
                # sleep while there are to many messages in the queues
                while True:
-                    count_tasks = get_queue_len(queue_service, settings.QUEUE_TASKS)
-                    count_results = get_queue_len(queue_service, settings.QUEUE_RESULTS)
+                    count_tasks = cloud_storage_helper.get_queue_len(settings.QUEUE_TASKS)
+                    count_results = cloud_storage_helper.get_queue_len(settings.QUEUE_RESULTS)
 
                     if count_tasks < settings.MIN_QUEUE_LEN and count_results < settings.MIN_QUEUE_LEN:
                         break
@@ -85,14 +86,11 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     logging.info("starting...")
 
-    storage_account = create_storage_account(settings.STORAGE_ACCOUNT_NAME, settings.STORAGE_ACCOUNT_KEY)
-    
-    blob_service = storage_account.create_blob_service()
-    #table_service = storage_account.create_table_service()
-    queue_service = storage_account.create_queue_service()
+    cloud_storage_helper = CloudStorageHelper(settings.STORAGE_ACCOUNT_NAME, settings.STORAGE_ACCOUNT_KEY)
+    message_helper = MessageHelper()
 
     # create queues
-    create_queues(queue_service, [settings.QUEUE_TASKS_DESCRIPTION, settings.QUEUE_TASKS, settings.QUEUE_RESULTS])
+    cloud_storage_helper.create_queues([settings.QUEUE_TASKS_DESCRIPTION, settings.QUEUE_TASKS, settings.QUEUE_RESULTS])
 
     # create dir for data
     if not os.path.isdir(settings.TEMP_BLOB_PATH):
@@ -108,8 +106,8 @@ if __name__ == '__main__':
         #
 
         # get 32 messages from the queue
-        messages = queue_service.get_messages(settings.QUEUE_TASKS_DESCRIPTION, 32)
-        #messages = queue_service.peek_messages(settings.QUEUE_TASKS_DESCRIPTION, 32)
+        #messages = cloud_storage_helper.peek_messages(settings.QUEUE_TASKS_DESCRIPTION, 32)
+        messages = cloud_storage_helper.get_messages(settings.QUEUE_TASKS_DESCRIPTION, 32)
 
         num_messages = len(messages)
 

@@ -15,7 +15,7 @@ class CloudStorageHelper(object):
         self.__table_service = None
 
 
-    def _decode_messages(self, messages):
+    def decode_messages(self, messages):
         for m in messages:
             m.message_text = self.decode_message(m.message_text)
 
@@ -57,7 +57,7 @@ class CloudStorageHelper(object):
         messages = self.__queue_service.get_messages(queue, num_of_messages)
 
         if decode:
-            _decode_messages(messages)
+            self.decode_messages(messages)
 
         return messages
 
@@ -65,7 +65,7 @@ class CloudStorageHelper(object):
         messages = self.__queue_service.peek_messages(queue, num_of_messages)
 
         if decode:
-            _decode_messages(messages)
+            self.decode_messages(messages)
 
         return messages
 
@@ -75,9 +75,8 @@ class CloudStorageHelper(object):
     # Blobs
 
     def get_blobs_list(self, container):
-        if self.__blob_service is None:
-            self.__blob_service = self.__storage_account.create_blob_service()
-
         blobs = self.__blob_service.list_blobs(container)
         return blobs
 
+    def get_blob_to_path(self, container, blob_name, file_name):
+        self.__blob_service.get_blob_to_path(container, blob_name, file_name)

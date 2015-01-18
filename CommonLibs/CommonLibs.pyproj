@@ -31,6 +31,9 @@
     <Compile Include="CloudStorageHelper.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MessageHelper.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="message_helper.py">
       <SubType>Code</SubType>
     </Compile>

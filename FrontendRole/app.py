@@ -15,19 +15,17 @@ from bottle_helpers import view_template
 import settings
 
 
-#sys.path.insert(0, '../CommonLibs/')
-from storage_helper import create_storage_account, create_queues, encode_message, decode_message
-from message_helper import encode_task_description_message
+sys.path.insert(0, '../CommonLibs/')
+from CloudQueueStorage import CloudQueueStorage
+from CloudStorageHelper import CloudStorageHelper
+from MessageHelper import MessageHelper  
+
 
 if '--debug' in sys.argv[1:] or 'SERVER_DEBUG' in os.environ:
     # Debug mode will enable more verbose output in the console window.
     # It must be set at the beginning of the script.
     bottle.debug(True)
 
-
-storage_account = None
-blob_service = None
-queue_service = None
 
 
 @route('/', name='tasks')
@@ -36,8 +34,7 @@ def tasks():
 
     tasks = [{'name': 'Task 1'},{'name': 'Task 2'}]
 
-    datasets = blob_service.list_blobs(settings.BLOB_DATA_CONTAINER)
-
+    datasets = cloud_storage_helper.get_blobs_list(settings.BLOB_DATA_CONTAINER)
 
     return view_template(tasks=tasks, datasets = datasets)
 
@@ -49,8 +46,8 @@ def tasks_add():
     method = request.forms.get('method')
     input = request.forms.get('input')
 
-    queue_message = encode_task_description_message(method, input)
-    queue_service.put_message(settings.QUEUE_TASKS_DESCRIPTION, queue_message)
+    queue_message = message_helper.create_task_description_message(method, input)
+    cloud_storage_helper.put_message(settings.QUEUE_TASKS_DESCRIPTION, queue_message)
 
     results = {'text': 'Task added', 'message': queue_message}
 
@@ -64,9 +61,8 @@ def wsgi_app():
 
 if __name__ == '__main__':
 
-    storage_account = create_storage_account(settings.STORAGE_ACCOUNT_NAME, settings.STORAGE_ACCOUNT_KEY)
-    blob_service = storage_account.create_blob_service()
-    queue_service = storage_account.create_queue_service()
+    cloud_storage_helper = CloudStorageHelper(settings.STORAGE_ACCOUNT_NAME, settings.STORAGE_ACCOUNT_KEY)
+    message_helper = MessageHelper()
 
     # Starts a local test server.
     HOST = os.environ.get('SERVER_HOST', 'localhost')

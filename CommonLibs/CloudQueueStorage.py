@@ -61,8 +61,8 @@ class CloudQueueStorage(object):
             queue_msg += self.__MESSAGE_IN_REDIS + self.__MESSAGE_PART_DELIMETER + key
             self.__cloud_storage.put_message(queue, queue_msg)
 
-    def get_messages(self, queue):
-        messages = self.__cloud_storage.get_messages(queue)
+    def get_messages(self, queue, num_of_messages=None):
+        messages = self.__cloud_storage.get_messages(queue, num_of_messages)
 
         for m in messages:
             msg = m.message_text
@@ -81,3 +81,9 @@ class CloudQueueStorage(object):
                 msg = json.loads(msg.decode(), 0)
 
             m.message_text = msg
+
+        return messages
+
+
+    def delete_message(queue, message_id, popreceipt):
+        self.__cloud_storage.delete_message(queue, message_id, popreceipt)

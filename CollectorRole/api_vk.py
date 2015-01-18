@@ -49,9 +49,12 @@ def vk_get_list(method, method_params, offset = 0, count = 100, auth = None):
     method_params['count'] = count
 
     result = []
-
+    i = 0
     while True:
         tmp_res = vk_request(method, method_params, auth, session = session)
+
+        if 'error' in tmp_res:
+            return tmp_res
 
         result.extend(tmp_res['response']['items'])
 
@@ -62,6 +65,12 @@ def vk_get_list(method, method_params, offset = 0, count = 100, auth = None):
             break
 
         method_params['offset'] = offset
+        i += 1
+
+        if i % 25 == 0:
+            sleep(0.3)
+        if i % 99 == 0:
+            sleep(1)
 
     return result
 
@@ -75,28 +84,31 @@ def vk_wall_get(id):
 
     result = vk_get_list(method, params, offset = 0, count = 100)
 
-    ## delete extra data
-    #for p in result:
-    #    # set likes/comments/reposts count
-    #    p['comments_count'] = p['comments']['count']
-    #    p['likes_count'] = p['likes']['count']
-    #    p['reposts_count'] = p['reposts']['count']
+    if 'error' in result:
+        return {'error': result['error']['error_msg']}
 
-    #    p.pop('comments_count', None)
-    #    p.pop('likes_count', None)
-    #    p.pop('reposts_count', None)
+    # delete extra data
+    for p in result:
+        # set likes/comments/reposts count
+        p['comments_count'] = p['comments']['count']
+        p['likes_count'] = p['likes']['count']
+        p['reposts_count'] = p['reposts']['count']
 
-    #    # delete attachments
-    #    p.pop('attachments', None)
+        p.pop('comments_count', None)
+        p.pop('likes_count', None)
+        p.pop('reposts_count', None)
 
-    #    # set copy-related parameters
-    #    if 'copy_history' in p:
-    #        p['copy_id'] = p['copy_history'][0]['id']
-    #        p['copy_owner_id'] = p['copy_history'][0]['owner_id']
-    #        p['copy_from_id'] = p['copy_history'][0]['from_id']
-    #        p['copy_text'] = p['copy_history'][0]['text']
+        # delete attachments
+        p.pop('attachments', None)
 
-    #        p.pop('copy_history', None)
+        # set copy-related parameters
+        if 'copy_history' in p:
+            p['copy_id'] = p['copy_history'][0]['id']
+            p['copy_owner_id'] = p['copy_history'][0]['owner_id']
+            p['copy_from_id'] = p['copy_history'][0]['from_id']
+            p['copy_text'] = p['copy_history'][0]['text']
+
+            p.pop('copy_history', None)
 
 
     return result
