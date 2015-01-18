@@ -4,8 +4,6 @@ import logging
 from datetime import datetime
 from time import sleep
 
-from azure.storage import CloudStorageAccount
-
 sys.path.insert(0, '../CommonLibs/')
 from CloudQueueStorage import CloudQueueStorage
 from CloudStorageHelper import CloudStorageHelper

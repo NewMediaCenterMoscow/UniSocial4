@@ -14,7 +14,12 @@ MIN_QUEUE_LEN = 50
 REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
 REDIS_DB = 0
-REDIS_PASSWORD = None
+REDIS_PASSWORD = '__paste_your_password_here__'
+
+SQL_SERVER_ADDRESS = '127.0.0.1'
+SQL_SERVER_USER = 'unisocial4'
+SQL_SERVER_PASSWORD = '__paste_your_password_here__'
+SQL_SERVER_DATABASE = 'unisocial4'
 
 # import local settings
 try:
