@@ -15,7 +15,7 @@ import settings
 
 
 def message_handler(message):
-    #cloud_storage_helper.delete_message(settings.QUEUE_TASKS, message.message_id, message.pop_receipt)
+    cloud_storage_helper.delete_message(settings.QUEUE_TASKS, message.message_id, message.pop_receipt)
     
     task = message_helper.parse_task_message(m.message_text)
     logging.info(task)
@@ -55,8 +55,8 @@ if __name__ == '__main__':
 
 
         # get 32 messages from the queue
-        messages = cloud_storage_helper.peek_messages(settings.QUEUE_TASKS, 32)
-        #messages = cloud_storage_helper.get_messages(settings.QUEUE_TASKS, 32)
+        #messages = cloud_storage_helper.peek_messages(settings.QUEUE_TASKS, 32)
+        messages = cloud_storage_helper.get_messages(settings.QUEUE_TASKS, 32)
 
         num_messages = len(messages)
 
@@ -65,6 +65,5 @@ if __name__ == '__main__':
 
         logging.info("working - " + str(num_messages))
         sleep(3.0)
-        sys.exit()
 
 

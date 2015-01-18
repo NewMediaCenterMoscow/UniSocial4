@@ -1,48 +1,41 @@
 ﻿import os
+import sys
+import logging
+from datetime import datetime
 from time import sleep
 
-#
-# The azure library provides access to services made available by the
-# Microsoft Azure platform, such as storage and messaging. 
-#
-# See http://go.microsoft.com/fwlink/?linkid=254360 for documentation and
-# example code.
-#
-from azure.servicebus import ServiceBusService
-from azure.storage import CloudStorageAccount
+sys.path.insert(0, '../CommonLibs/')
+from CloudQueueStorage import CloudQueueStorage
+from CloudStorageHelper import CloudStorageHelper
+from MessageHelper import MessageHelper
 
-#
-# The CloudStorageAccount provides factory methods for the queue, table, and
-# blob services.
-#
-# See http://go.microsoft.com/fwlink/?linkid=246933 for Storage documentation.
-#
-STORAGE_ACCOUNT_NAME = '__paste_your_storage_account_name_here__'
-STORAGE_ACCOUNT_KEY = '__paste_your_storage_key_here__'
+import settings
+from DbHelper import DbHelper
 
-if os.environ.get('EMULATED', '').lower() == 'true':
-    # Running in the emulator, so use the development storage account
-    storage_account = CloudStorageAccount(None, None)
-else:
-    storage_account = CloudStorageAccount(STORAGE_ACCOUNT_NAME, STORAGE_ACCOUNT_KEY)
+def message_handler(message):
+    cloud_storage_helper.delete_message(settings.QUEUE_RESULTS, message.message_id, message.pop_receipt)
 
-blob_service = storage_account.create_blob_service()
-table_service = storage_account.create_table_service()
-queue_service = storage_account.create_queue_service()
+    task = m.message_text['task']
+    data = m.message_text['result']
+    logging.info(task)
 
-#
-# Service Bus is a messaging solution for applications. It sits between
-# components of your applications and enables them to exchange messages in a
-# loosely coupled way for improved scale and resiliency.
-#
-# See http://go.microsoft.com/fwlink/?linkid=246934 for Service Bus documentation.
-#
-SERVICE_BUS_NAMESPACE = '__paste_your_service_bus_namespace_here__'
-SERVICE_BUS_KEY = '__paste_your_service_bus_key_here__'
-bus_service = ServiceBusService(SERVICE_BUS_NAMESPACE, SERVICE_BUS_KEY, issuer='owner')
+    db_helper.save(task, data)
+
 
 
 if __name__ == '__main__':
+
+    #logging.basicConfig(filename='debug.log',level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG)
+    logging.info("starting...")
+
+    cloud_queue_storage = CloudQueueStorage(
+        settings.STORAGE_ACCOUNT_NAME, settings.STORAGE_ACCOUNT_KEY,
+        settings.REDIS_HOST, settings.REDIS_PORT, settings.REDIS_DB, settings.REDIS_PASSWORD)
+    cloud_storage_helper = CloudStorageHelper(settings.STORAGE_ACCOUNT_NAME, settings.STORAGE_ACCOUNT_KEY)
+    message_helper = MessageHelper()
+    db_helper = DbHelper(settings.SQL_SERVER_ADDRESS, settings.SQL_SERVER_USER, settings.SQL_SERVER_PASSWORD, settings.SQL_SERVER_DATABASE)
+
     while True:
         #
         # Write your worker process here.
@@ -51,5 +44,17 @@ if __name__ == '__main__':
         #    bus_service.receive_queue_message('queue name', timeout=seconds)
         # to avoid consuming 100% CPU time while your worker has no work.
         #
-        sleep(1.0)
 
+
+        # get 32 messages from the queue
+        #messages = cloud_queue_storage.peek_messages(settings.QUEUE_RESULTS, 32)
+        messages = cloud_queue_storage.get_messages(settings.QUEUE_RESULTS, 32)
+
+        num_messages = len(messages)
+
+        for m in messages:
+            message_handler(m)
+
+        logging.info("working - " + str(num_messages))
+        sleep(3.0)
+        sys.exit()

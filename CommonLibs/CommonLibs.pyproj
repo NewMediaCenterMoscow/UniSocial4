@@ -5,7 +5,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>de10f61d-6d6f-4a6c-b8af-d775e8a391e8</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>storage_helper.py</StartupFile>
+    <StartupFile>
+    </StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -34,10 +35,6 @@
     <Compile Include="MessageHelper.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="message_helper.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="storage_helper.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="{9a7a9026-48c1-4688-9d5d-e5699d47d074}\3.4" />

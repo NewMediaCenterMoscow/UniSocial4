@@ -25,6 +25,25 @@ class CloudQueueStorage(object):
         self.__redis = redis.StrictRedis(host=redis_host, port=redis_port, db=redis_db, password=redis_password)
 
 
+    def __process_messages(self, messages):
+        for m in messages:
+            msg = m.message_text
+
+            msg_parts = m.message_text.split(self.__MESSAGE_PART_DELIMETER)
+
+            # see put_message function for details
+            if msg_parts[1] == self.__MESSAGE_IN_QUEUE:
+                msg = msg_parts[2]
+            elif msg_parts[1] == self.__MESSAGE_IN_REDIS:
+                key = msg_parts[2]
+                encoded_message = self.__redis.get(key)
+                msg = zlib.decompress(encoded_message)
+
+            if msg_parts[0] == self.__MESSAGE_CODED:
+                msg = json.loads(msg.decode(), 0)
+
+            m.message_text = msg
+
     def put_message(self, queue, message):
         # message format (default): 
         #  the frist symbol - "p" or "n: for pickle/ not pickle
@@ -64,23 +83,14 @@ class CloudQueueStorage(object):
     def get_messages(self, queue, num_of_messages=None):
         messages = self.__cloud_storage.get_messages(queue, num_of_messages)
 
-        for m in messages:
-            msg = m.message_text
+        self.__process_messages(messages)
 
-            msg_parts = m.message_text.split(self.__MESSAGE_PART_DELIMETER)
+        return messages
 
-            # see put_message function for details
-            if msg_parts[1] == self.__MESSAGE_IN_QUEUE:
-                msg = msg_parts[1]
-            elif msg_parts[1] == self.__MESSAGE_IN_REDIS:
-                key = msg_parts[1]
-                encoded_message = self.__redis.get(key)
-                msg = zlib.decompress(encoded_message)
+    def peek_messages(self, queue, num_of_messages=None):
+        messages = self.__cloud_storage.peek_messages(queue, num_of_messages)
 
-            if msg_parts[0] == self.__MESSAGE_CODED:
-                msg = json.loads(msg.decode(), 0)
-
-            m.message_text = msg
+        self.__process_messages(messages)
 
         return messages
 

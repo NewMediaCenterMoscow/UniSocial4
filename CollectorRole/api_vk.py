@@ -94,9 +94,9 @@ def vk_wall_get(id):
         p['likes_count'] = p['likes']['count']
         p['reposts_count'] = p['reposts']['count']
 
-        p.pop('comments_count', None)
-        p.pop('likes_count', None)
-        p.pop('reposts_count', None)
+        p.pop('comments', None)
+        p.pop('likes', None)
+        p.pop('reposts', None)
 
         # delete attachments
         p.pop('attachments', None)
