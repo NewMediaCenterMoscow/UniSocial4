@@ -4,7 +4,7 @@ import datetime
 import pypyodbc
 
 
-class DbHelper(object):
+class DbHelper():
     """Helper for MS SQL Server"""
 
     def __init__(self, address, username, password, database):

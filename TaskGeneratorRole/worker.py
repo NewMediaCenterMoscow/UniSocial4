@@ -11,71 +11,79 @@ from azure.storage import CloudStorageAccount
 sys.path.insert(0, '../CommonLibs/')
 from CloudStorageHelper import CloudStorageHelper
 from MessageHelper import MessageHelper
-
+from WorkerHelper import Worker
 
 import settings
 
+class TaskGeneratorWorker(Worker):
 
-def message_handler(message):
-    cloud_storage_helper.delete_message(settings.QUEUE_TASKS_DESCRIPTION, message.message_id, message.pop_receipt)
+    def __init__(self):
+        Worker.__init__(self)
 
-    # get task description
-    task = message_helper.parse_task_description_message(m.message_text)
-    logging.info(task)
+        self.cloud_storage_helper = CloudStorageHelper(settings.STORAGE_ACCOUNT_NAME, settings.STORAGE_ACCOUNT_KEY)
+        self.message_helper = MessageHelper()
 
-    ## get blob modified time
-    #blob_prop = blob_service.get_blob_properties(settings.BLOB_DATA_CONTAINER, task['input'])
-    #blol_etag = datetime.strptime(blob_prop['last-modified'], '%a, %d %b %Y %H:%M:%S GMT').replace(tzinfo=pytz.UTC)
+        # create queues
+        self.cloud_storage_helper.create_queues([settings.QUEUE_TASKS_DESCRIPTION, settings.QUEUE_TASKS, settings.QUEUE_RESULTS])
 
-    #print(blob_prop['last-modified'])
-    #print(blol_modified_time)
-
-    ## check if file already exists
-    #filename = settings.TEMP_BLOB_PATH + task['input']
-    #if os.path.exists(filename):
-    #    # get last modified date
-    #    file_modified_time = datetime.fromtimestamp(os.path.getmtime(filename))
-
-    #    # if blob newer - update file
-    #    if blol_modified_time > file_modified_time:
-    #        blob_service.get_blob_to_path(settings.BLOB_DATA_CONTAINER, task['input'], filename)
-    #        logging.info(task['input'] + ': updating...')
-    #    else:
-    #         logging.info(task['input'] + ': up-to-date')
-    #else:
-    #    blob_service.get_blob_to_path(settings.BLOB_DATA_CONTAINER, task['input'], filename)
-    #    logging.info(task['input'] + ': downloading...')
+        # create dir for data
+        if not os.path.isdir(settings.TEMP_BLOB_PATH):
+             os.makedirs(settings.TEMP_BLOB_PATH)
 
 
-    # check if file already exists
-    filename = settings.TEMP_BLOB_PATH + task['input']
-    if not os.path.exists(filename):
-        cloud_storage_helper.get_blob_to_path(settings.BLOB_DATA_CONTAINER, task['input'], filename)
 
-    # count tasks
-    task_count = 0
+    def message_handler(message):
+        self.cloud_storage_helper.delete_message(settings.QUEUE_TASKS_DESCRIPTION, message.message_id, message.pop_receipt)
 
-    with open(filename, 'r') as file:
-       for ids in file:
+        # get task description
+        task = self.message_helper.parse_task_description_message(m.message_text)
+        logging.info(task)
 
-           queue_message = message_helper.create_task_message(task['method'], ids.strip())
-           cloud_storage_helper.put_message(settings.QUEUE_TASKS, queue_message)
+        # check if file already exists
+        filename = settings.TEMP_BLOB_PATH + task['input']
+        if not os.path.exists(filename):
+            self.cloud_storage_helper.get_blob_to_path(settings.BLOB_DATA_CONTAINER, task['input'], filename)
 
-           # check task queue every 16th task
-           if task_count % 16 == 0:
+        # count tasks
+        task_count = 0
+
+        with open(filename, 'r') as file:
+           for ids in file:
+
+               queue_message = self.message_helper.create_task_message(task['method'], ids.strip())
+               self.cloud_storage_helper.put_message(settings.QUEUE_TASKS, queue_message)
+
+               # check task queue every 16th task
+               if task_count % 16 == 0:
             
-               # sleep while there are to many messages in the queues
-               while True:
-                    count_tasks = cloud_storage_helper.get_queue_len(settings.QUEUE_TASKS)
-                    count_results = cloud_storage_helper.get_queue_len(settings.QUEUE_RESULTS)
+                   # sleep while there are to many messages in the queues
+                   while True:
+                        count_tasks = self.cloud_storage_helper.get_queue_len(settings.QUEUE_TASKS)
+                        count_results = self.cloud_storage_helper.get_queue_len(settings.QUEUE_RESULTS)
 
-                    if count_tasks < settings.MIN_QUEUE_LEN and count_results < settings.MIN_QUEUE_LEN:
-                        break
+                        if count_tasks < settings.MIN_QUEUE_LEN and count_results < settings.MIN_QUEUE_LEN:
+                            break
 
-                    logging.info('sleeping...')
-                    sleep(10.0)
+                        logging.info('sleeping...')
+                        sleep(10.0)
 
-           task_count += 1
+               task_count += 1
+
+
+    def work(self):
+        messages = self.cloud_storage_helper.get_messages(settings.QUEUE_TASKS_DESCRIPTION, 32)
+
+        num_messages = len(messages)
+
+        for m in messages:
+            self.message_handler(m)
+
+        logging.info('working - ' + str(num_messages))
+
+        if num_messages > 0:
+            return True
+        else:
+            return False
 
 
 
@@ -86,34 +94,5 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     logging.info("starting...")
 
-    cloud_storage_helper = CloudStorageHelper(settings.STORAGE_ACCOUNT_NAME, settings.STORAGE_ACCOUNT_KEY)
-    message_helper = MessageHelper()
-
-    # create queues
-    cloud_storage_helper.create_queues([settings.QUEUE_TASKS_DESCRIPTION, settings.QUEUE_TASKS, settings.QUEUE_RESULTS])
-
-    # create dir for data
-    if not os.path.isdir(settings.TEMP_BLOB_PATH):
-         os.makedirs(settings.TEMP_BLOB_PATH)
-
-    while True:
-        #
-        # Write your worker process here.
-        #
-        # You will probably want to call a blocking function such as
-        #    bus_service.receive_queue_message('queue name', timeout=seconds)
-        # to avoid consuming 100% CPU time while your worker has no work.
-        #
-
-        # get 32 messages from the queue
-        #messages = cloud_storage_helper.peek_messages(settings.QUEUE_TASKS_DESCRIPTION, 32)
-        messages = cloud_storage_helper.get_messages(settings.QUEUE_TASKS_DESCRIPTION, 32)
-
-        num_messages = len(messages)
-
-        for m in messages:
-            message_handler(m)
-
-        logging.info("working - " + str(num_messages))
-        sleep(3.0)
-
+    worker = TaskGeneratorWorker()
+    worker.run()
