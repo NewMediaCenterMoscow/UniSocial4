@@ -1,4 +1,5 @@
 import os
+import logging
 import datetime
 
 import pypyodbc
@@ -28,50 +29,80 @@ class DbHelper():
             yield l[i:i+n]
 
 
-    def __save_wall_get(self, task, results):
+    def __save_values(self, insert, values):
         if not self.__conn.connected:
             self.__conn = pypyodbc.connect(self.__conn_str)
-
+        
         cur = self.__conn.cursor()
 
-        insert = '''INSERT INTO dbo.posts
-        (id, from_id, to_id, date, type, text, comment_count, like_count, repost_count, copy_id, copy_from_id, copy_to_id, copy_text) 
-        VALUES 
-        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
-
-        chunks = self.__chunks(results, self.__chunk_size)
-
+        chunks = self.__chunks(values, self.__chunk_size)
         for ch in chunks:
 
-            # check date
-            for row in ch:
-                if isinstance(row['date'], int):
-                    row['date'] = datetime.datetime.fromtimestamp(row['date'])
+            try:
+                cur.executemany(insert, ch)
+                cur.commit()
+            except pypyodbc.IntegrityError as e:
+                logging.warning('insert by rows...')
 
-            values = [(
-               row['id'], 
-               row['from_id'],
-               row['owner_id'], # to_id <- owner_id
-               row['date'].strftime('%Y-%m-%d %H:%M:%S'), 
-               row['post_type'], # type <- post_type
-               row['text'], 
-               row['comments_count'], # add 's' at the end (comment_count <- comments_count)
-               row['likes_count'],  # add 's' at the end
-               row['reposts_count'],  # add 's' at the end
-               row['copy_id'] if 'copy_id' in row else 0, 
-               row['copy_from_id'] if 'copy_from_id' in row else 0,
-               row['copy_to_id'] if 'copy_to_id' in row else 0,
-               row['copy_text'] if 'copy_text' in row else '',
-            ) for row in ch]
-
-            cur.executemany(insert, values)
-            cur.commit()
+                for row in ch: 
+                    try:
+                        cur.execute(insert, row)
+                        cur.commit()
+                    except pypyodbc.IntegrityError as e:
+                        logging.warning('dublicate...')
 
         cur.close()
+
+
+    def __save_wall_get(self, task, results):
+
+        insert = '''
+INSERT INTO dbo.posts
+(id, from_id, to_id, date, type, text, comment_count, like_count, repost_count, copy_id, copy_from_id, copy_to_id, copy_text) 
+VALUES 
+(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+'''
+
+        values = [(
+            row['id'], 
+            row['from_id'],
+            row['owner_id'], # to_id <- owner_id
+            row['date'].strftime('%Y-%m-%d %H:%M:%S'), 
+            row['post_type'], # type <- post_type
+            row['text'], 
+            row['comments_count'], # add 's' at the end (comment_count <- comments_count)
+            row['likes_count'],  # add 's' at the end
+            row['reposts_count'],  # add 's' at the end
+            row['copy_id'] if 'copy_id' in row else 0, 
+            row['copy_from_id'] if 'copy_from_id' in row else 0,
+            row['copy_to_id'] if 'copy_to_id' in row else 0,
+            row['copy_text'] if 'copy_text' in row else '',
+        ) for row in results]
+
+        self.__save_values(insert, values)
+
+
+    def __save_friends_get(self, task, results):
+
+        insert = '''
+INSERT INTO dbo.friends
+(user_id, friend_id) 
+VALUES 
+(?, ?)
+'''
+
+        values = [(
+               row[0], 
+               row[1],
+        ) for row in results]
+
+        self.__save_values(insert, values)
+
 
     def save(self, task, results):
         if task['method'] == 'wall.get':
             self.__save_wall_get(task, results)
-
+        if task['method'] == 'friends.get':
+            self.__save_friends_get(task, results)
 
 

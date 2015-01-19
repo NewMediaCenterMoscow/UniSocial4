@@ -26,8 +26,8 @@ class Worker():
                 if self.__sleep_interval == 0:
                     self.__sleep_interval = self.__base_sleep_interval
 
-                self.__sleep_interval += self.__sleep_interval
-
+                if self.__sleep_interval < self.__max_sleep_interval:
+                    self.__sleep_interval += self.__sleep_interval
 
             logging.info("sleep - " + str(self.__sleep_interval))
             sleep(self.__sleep_interval)

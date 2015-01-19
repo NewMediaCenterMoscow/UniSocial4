@@ -1,6 +1,8 @@
 import requests
 import logging
+import datetime
 from time import sleep
+
 
 def get_list_offset(items_count, current_offset = 0, count = 100):
     current_offset += count
@@ -110,5 +112,8 @@ def vk_wall_get(id):
 
             p.pop('copy_history', None)
 
+
+        # convert date
+        p['date'] = datetime.datetime.fromtimestamp(p['date'])
 
     return result
