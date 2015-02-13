@@ -30,7 +30,7 @@ class TaskGeneratorWorker(Worker):
 
 
 
-    def message_handler(message):
+    def message_handler(self, message):
         self.cloud_storage_helper.delete_message(settings.QUEUE_TASKS_DESCRIPTION, message.message_id, message.pop_receipt)
 
         # get task description

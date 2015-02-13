@@ -26,7 +26,7 @@ class CollectorWorker(Worker):
         self.message_helper = MessageHelper()
 
 
-    def message_handler(message):
+    def message_handler(self, message):
         self.cloud_storage_helper.delete_message(settings.QUEUE_TASKS, message.message_id, message.pop_receipt)
     
         task = self.message_helper.parse_task_message(m.message_text)

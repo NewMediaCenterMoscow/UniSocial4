@@ -26,7 +26,7 @@ class SaveResultWorker(Worker):
         self.message_helper = MessageHelper()
         self.db_helper = DbHelper(settings.SQL_SERVER_CONN_STR)
 
-    def message_handler(message):
+    def message_handler(self, message):
         self.cloud_storage_helper.delete_message(settings.QUEUE_RESULTS, message.message_id, message.pop_receipt)
 
         task = m.message_text['task']
