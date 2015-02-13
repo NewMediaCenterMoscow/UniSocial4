@@ -32,8 +32,11 @@ class CollectorWorker(Worker):
         task = self.message_helper.parse_task_message(message.message_text)
         logging.info(task)
 
-        if task['method'] == 'wall.get':
-            result = api_vk.vk_wall_get(task['input'])
+        if task['method'] == 'wall.get' or task['method'] == 'friends.get':
+            if task['method'] == 'wall.get':
+                result = api_vk.vk_wall_get(task['input'])
+            elif task['method'] == 'friends.get':
+                result = api_vk.vk_friends_get(task['input'])
 
             if 'error' in result:
                 logging.error(result['error'])
