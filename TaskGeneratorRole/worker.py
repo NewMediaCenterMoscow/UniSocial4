@@ -34,7 +34,7 @@ class TaskGeneratorWorker(Worker):
         self.cloud_storage_helper.delete_message(settings.QUEUE_TASKS_DESCRIPTION, message.message_id, message.pop_receipt)
 
         # get task description
-        task = self.message_helper.parse_task_description_message(m.message_text)
+        task = self.message_helper.parse_task_description_message(message.message_text)
         logging.info(task)
 
         # check if file already exists
