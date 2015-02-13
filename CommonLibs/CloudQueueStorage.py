@@ -15,7 +15,6 @@ class CloudQueueStorage(object):
     __MESSAGE_NO_CODED = 'n'
     __MESSAGE_IN_REDIS = 'redis'
     __MESSAGE_IN_QUEUE = 'queue'
-    __MESSAGE_PART_DELIMETER = ':'
 
     def __init__(self, 
                  storage_account_name = None, storage_account_key = None, 
@@ -29,7 +28,7 @@ class CloudQueueStorage(object):
         for m in messages:
             msg = m.message_text
 
-            msg_parts = m.message_text.split(self.__MESSAGE_PART_DELIMETER)
+            msg_parts = [msg[0],msg[2:7],msg[8:]]
 
             # see put_message function for details
             if msg_parts[1] == self.__MESSAGE_IN_QUEUE:
