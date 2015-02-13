@@ -24,7 +24,7 @@ class SaveResultWorker(Worker):
             settings.REDIS_HOST, settings.REDIS_PORT, settings.REDIS_DB, settings.REDIS_PASSWORD)
         self.cloud_storage_helper = CloudStorageHelper(settings.STORAGE_ACCOUNT_NAME, settings.STORAGE_ACCOUNT_KEY)
         self.message_helper = MessageHelper()
-        self.db_helper = DbHelper(settings.SQL_SERVER_ADDRESS, settings.SQL_SERVER_USER, settings.SQL_SERVER_PASSWORD, settings.SQL_SERVER_DATABASE)
+        self.db_helper = DbHelper(settings.SQL_SERVER_CONN_STR)
 
     def message_handler(message):
         self.cloud_storage_helper.delete_message(settings.QUEUE_RESULTS, message.message_id, message.pop_receipt)

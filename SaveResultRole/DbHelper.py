@@ -8,15 +8,9 @@ import pypyodbc
 class DbHelper():
     """Helper for MS SQL Server"""
 
-    def __init__(self, address, username, password, database):
+    def __init__(self, conn_str):
         self.__chunk_size = 50
-
-        self.__address = address
-        self.__username = username
-        self.__password = password
-        self.__database = database
-
-        self.__conn_str = 'Driver={{SQL Server Native Client 11.0}};Server=tcp:{0};Database={1};Uid={2};Pwd={3};Encrypt=yes;Connection Timeout=30;'.format(address, database, username, password)
+        self.__conn_str = conn_str
 
         self.__conn = pypyodbc.connect(self.__conn_str)
 
