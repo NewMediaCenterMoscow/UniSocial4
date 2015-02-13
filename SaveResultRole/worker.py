@@ -58,18 +58,8 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     logging.info("starting...")
 
-    #worker = SaveResultWorker()
-    #worker.run()
+    worker = SaveResultWorker()
+    worker.run()
 
-    db_helper = DbHelper(settings.SQL_SERVER_ADDRESS, settings.SQL_SERVER_USER, settings.SQL_SERVER_PASSWORD, settings.SQL_SERVER_DATABASE)
-    db_helper.save(
-        {'method': 'friends.get'},
-        [
-            [1,3],
-            [1,1],
-            [1,4],
-        ]
-    )
-    sys,exit()
 
 

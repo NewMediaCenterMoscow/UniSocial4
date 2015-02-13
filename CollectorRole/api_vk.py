@@ -117,3 +117,20 @@ def vk_wall_get(id):
         p['date'] = datetime.datetime.fromtimestamp(p['date'])
 
     return result
+
+
+def vk_friends_get(id):
+    method = 'friends.get'
+    params = {
+        'user_id': id,
+        'filter': 'all',
+    }
+
+    result = vk_request(method, params)
+
+    if 'error' in result:
+        return {'error': result['error']['error_msg']}
+
+    return result
+
+
