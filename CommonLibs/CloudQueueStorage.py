@@ -36,13 +36,13 @@ class CloudQueueStorage(object):
             elif msg_parts[1] == self.__MESSAGE_IN_REDIS:
                 key = msg_parts[2]
                 encoded_message = self.__redis.get(key)
-                msg = zlib.decompress(encoded_message)
+                msg = zlib.decompress(encoded_message).decode()
 
                 # del redis record
                 self.__redis.delete(key)
 
             if msg_parts[0] == self.__MESSAGE_CODED:
-                msg = json.loads(msg.decode(), 0)
+                msg = json.loads(msg, 0)
 
             m.message_text = msg
 
