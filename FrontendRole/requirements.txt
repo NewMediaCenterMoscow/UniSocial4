@@ -1,1 +1,2 @@
 bottle
+azure>=0.8.0

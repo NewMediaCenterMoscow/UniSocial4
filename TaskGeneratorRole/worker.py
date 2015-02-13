@@ -6,8 +6,6 @@ from datetime import datetime
 import logging
 from time import sleep
 
-from azure.storage import CloudStorageAccount
-
 sys.path.insert(0, '../CommonLibs/')
 from CloudStorageHelper import CloudStorageHelper
 from MessageHelper import MessageHelper
