@@ -131,6 +131,6 @@ def vk_friends_get(id):
     if 'error' in result:
         return {'error': result['error']['error_msg']}
 
-    return result
+    return result['response']['items']
 
 

@@ -28,7 +28,7 @@ class CloudQueueStorage(object):
         for m in messages:
             msg = m.message_text
 
-            msg_parts = [msg[0],msg[2:7],msg[8:]]
+            msg_parts = [msg[0],msg[1:6],msg[6:]]
 
             # see put_message function for details
             if msg_parts[1] == self.__MESSAGE_IN_QUEUE:
@@ -59,12 +59,11 @@ class CloudQueueStorage(object):
         if not isinstance(message, str):
             message = json.dumps(message)
             queue_msg = self.__MESSAGE_CODED
-        queue_msg += self.__MESSAGE_PART_DELIMETER
 
 
         # if the message is small - put it directly to queue
         if len(message) < self.__queue_message_limit:
-            queue_msg += self.__MESSAGE_IN_QUEUE + self.__MESSAGE_PART_DELIMETER + message
+            queue_msg += self.__MESSAGE_IN_QUEUE + message
             self.__cloud_storage.put_message(queue, queue_msg)
         else: # message is large so put it to redis and save link in queue
 
@@ -79,7 +78,7 @@ class CloudQueueStorage(object):
             self.__redis.set(key, encoded_message)
 
             # put message to queue
-            queue_msg += self.__MESSAGE_IN_REDIS + self.__MESSAGE_PART_DELIMETER + key
+            queue_msg += self.__MESSAGE_IN_REDIS + key
             self.__cloud_storage.put_message(queue, queue_msg)
 
     def get_messages(self, queue, num_of_messages=None):
@@ -99,3 +98,4 @@ class CloudQueueStorage(object):
 
     def delete_message(queue, message_id, popreceipt):
         self.__cloud_storage.delete_message(queue, message_id, popreceipt)
+

@@ -86,8 +86,8 @@ VALUES
 '''
 
         values = [(
-               int(row[0]), 
-               int(row[1]),
+               task['input'], 
+               row,
         ) for row in results]
 
         self.__save_values(insert, values)
