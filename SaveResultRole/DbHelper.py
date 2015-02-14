@@ -86,8 +86,8 @@ VALUES
 '''
 
         values = [(
-               row[0], 
-               row[1],
+               int(row[0]), 
+               int(row[1]),
         ) for row in results]
 
         self.__save_values(insert, values)
