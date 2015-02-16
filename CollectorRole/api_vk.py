@@ -113,9 +113,6 @@ def vk_wall_get(id):
             p.pop('copy_history', None)
 
 
-        # convert date
-        p['date'] = datetime.datetime.fromtimestamp(p['date'])
-
     return result
 
 
