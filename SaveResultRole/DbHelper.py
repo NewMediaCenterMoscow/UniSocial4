@@ -9,7 +9,7 @@ class DbHelper():
     """Helper for MS SQL Server"""
 
     def __init__(self, conn_str):
-        self.__chunk_size = 50
+        self.__chunk_size = 30
         self.__conn_str = conn_str
 
         self.__conn = pypyodbc.connect(self.__conn_str)
