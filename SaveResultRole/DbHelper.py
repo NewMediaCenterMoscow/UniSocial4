@@ -9,7 +9,7 @@ class DbHelper():
     """Helper for MS SQL Server"""
 
     def __init__(self, conn_str):
-        self.__chunk_size = 30
+        self.__chunk_size = 50
         self.__conn_str = conn_str
 
         self.__conn = pypyodbc.connect(self.__conn_str)
@@ -50,10 +50,6 @@ class DbHelper():
 
     def __save_wall_get(self, task, results):
 
-        for p in results:
-            if isinstance(p['date'], int):
-                p['date'] = datetime.datetime.fromtimestamp(p['date'])
-
         insert = '''
 INSERT INTO dbo.posts
 (id, from_id, to_id, date, type, text, comment_count, like_count, repost_count, copy_id, copy_from_id, copy_to_id, copy_text) 
@@ -65,7 +61,7 @@ VALUES
             row['id'], 
             row['from_id'],
             row['owner_id'], # to_id <- owner_id
-            row['date'].strftime('%Y-%m-%d %H:%M:%S'), 
+            datetime.datetime.fromtimestamp(row['date']).strftime('%Y-%m-%d %H:%M:%S'), 
             row['post_type'], # type <- post_type
             row['text'], 
             row['comments_count'], # add 's' at the end (comment_count <- comments_count)

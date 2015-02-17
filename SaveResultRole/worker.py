@@ -41,7 +41,8 @@ class SaveResultWorker(Worker):
         num_messages = len(messages)
 
         for m in messages:
-            self.message_handler(m)
+            if 'task' in m.message_text:
+                self.message_handler(m)
 
         logging.info('working - ' + str(num_messages))
 

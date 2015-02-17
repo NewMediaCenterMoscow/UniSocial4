@@ -2,6 +2,7 @@ import uuid
 import pickle
 import json
 import zlib
+import logging
 
 import redis
 from CloudStorageHelper import CloudStorageHelper
@@ -36,6 +37,11 @@ class CloudQueueStorage(object):
             elif msg_parts[1] == self.__MESSAGE_IN_REDIS:
                 key = msg_parts[2]
                 encoded_message = self.__redis.get(key)
+
+                if encoded_message is None:
+                    logging.error("Key not found in Redis: " + key)
+                    continue
+
                 msg = zlib.decompress(encoded_message).decode()
 
                 # del redis record
