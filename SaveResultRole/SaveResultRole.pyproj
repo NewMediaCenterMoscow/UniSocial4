@@ -27,7 +27,13 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AbstractWriter.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DbHelper.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FileWriter.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="settings.py" />

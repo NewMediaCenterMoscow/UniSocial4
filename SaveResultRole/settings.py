@@ -17,6 +17,7 @@ REDIS_DB = 0
 REDIS_PASSWORD = '__paste_your_password_here__'
 
 SQL_SERVER_CONN_STR = 'DSN=MSSQL'
+DATA_DIR = '.'
 
 # import local settings
 try:
