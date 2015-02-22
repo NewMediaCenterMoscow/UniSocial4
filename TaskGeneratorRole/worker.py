@@ -89,7 +89,7 @@ class TaskGeneratorWorker(Worker):
 if __name__ == '__main__':
 
     #logging.basicConfig(filename='debug.log',level=logging.DEBUG)
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG, format="[TG] %(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S")
     logging.info("starting...")
 
     worker = TaskGeneratorWorker()
