@@ -29,7 +29,6 @@ class SaveResultWorker(Worker):
         self.results_writer = FileWriter(settings.DATA_DIR)
 
     def message_handler(self, message):
-        self.cloud_storage_helper.delete_message(settings.QUEUE_RESULTS, message.message_id, message.pop_receipt)
 
         task = message.message_text['task']
         data = message.message_text['result']
@@ -40,6 +39,8 @@ class SaveResultWorker(Worker):
 
     def work(self):
         messages = self.cloud_queue_storage.get_messages(settings.QUEUE_RESULTS, 32)
+        for m in messages:
+            self.cloud_storage_helper.delete_message(settings.QUEUE_RESULTS, m.message_id, m.pop_receipt)
 
         num_messages = len(messages)
 

@@ -31,7 +31,6 @@ class TaskGeneratorWorker(Worker):
 
 
     def message_handler(self, message):
-        self.cloud_storage_helper.delete_message(settings.QUEUE_TASKS_DESCRIPTION, message.message_id, message.pop_receipt)
 
         # get task description
         task = self.message_helper.parse_task_description_message(message.message_text)
@@ -70,6 +69,8 @@ class TaskGeneratorWorker(Worker):
 
     def work(self):
         messages = self.cloud_storage_helper.get_messages(settings.QUEUE_TASKS_DESCRIPTION, 32)
+        for m in messages:
+            self.cloud_storage_helper.delete_message(settings.QUEUE_TASKS_DESCRIPTION, m.message_id, m.pop_receipt)
 
         num_messages = len(messages)
 

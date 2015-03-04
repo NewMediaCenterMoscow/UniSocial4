@@ -27,7 +27,6 @@ class CollectorWorker(Worker):
 
 
     def message_handler(self, message):
-        self.cloud_storage_helper.delete_message(settings.QUEUE_TASKS, message.message_id, message.pop_receipt)
     
         task = self.message_helper.parse_task_message(message.message_text)
         logging.info(task)
@@ -50,6 +49,8 @@ class CollectorWorker(Worker):
 
     def work(self):
         messages = self.cloud_storage_helper.get_messages(settings.QUEUE_TASKS, 32)
+        for m in messages:
+            self.cloud_storage_helper.delete_message(settings.QUEUE_TASKS, m.message_id, m.pop_receipt)
 
         num_messages = len(messages)
 
