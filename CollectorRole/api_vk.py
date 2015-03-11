@@ -101,7 +101,10 @@ def vk_wall_get(id):
         p.pop('reposts', None)
 
         # delete attachments
-        p.pop('attachments', None)
+        if 'attachments' in p:
+            p['attachments'] = [a['link']['url'] for a in p['attachments'] if a['type'] == 'link']
+        else:
+            p['attachments'] = []
 
         # set copy-related parameters
         if 'copy_history' in p:

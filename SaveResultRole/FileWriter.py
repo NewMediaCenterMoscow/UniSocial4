@@ -35,6 +35,7 @@ class FileWriter(AbstractWriter):
             row['copy_from_id'] if 'copy_from_id' in row else 0,
             row['copy_to_id'] if 'copy_to_id' in row else 0,
             row['copy_text'] if 'copy_text' in row else '',
+            '|'.join(row['attachments'])
         ) for row in results]
 
         self.__save_values(task, values)
