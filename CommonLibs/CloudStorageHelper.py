@@ -1,4 +1,6 @@
 import base64
+import logging
+
 from azure.storage import CloudStorageAccount
 
 class CloudStorageHelper(object):
@@ -43,9 +45,13 @@ class CloudStorageHelper(object):
             self.__queue_service.create_queue(name)
 
     def get_queue_len(self, name):
-        queue_metadata = self.__queue_service.get_queue_metadata(name)
-        count = queue_metadata['x-ms-approximate-messages-count']    
-        return int(count)
+        try:
+            queue_metadata = self.__queue_service.get_queue_metadata(name)
+            count = queue_metadata['x-ms-approximate-messages-count']    
+            return int(count)
+        except Exception as e:
+            logging.error("getting queue metadata: {0}".format(e))
+            return -1
 
     def put_message(self, queue, message, encode = True):
         if encode:
@@ -54,15 +60,24 @@ class CloudStorageHelper(object):
         self.__queue_service.put_message(queue, message)
 
     def get_messages(self, queue, num_of_messages=None, decode = True):
-        messages = self.__queue_service.get_messages(queue, num_of_messages)
+        try:
+            messages = self.__queue_service.get_messages(queue, num_of_messages)
+        except Exception as e:
+            logging.error("get messages: {0}".format(e))
+            messages = []
 
         if decode:
             self.decode_messages(messages)
 
         return messages
 
+
     def peek_messages(self, queue, num_of_messages=None, decode = True):
-        messages = self.__queue_service.peek_messages(queue, num_of_messages)
+        try:
+            messages = self.__queue_service.peek_messages(queue, num_of_messages)
+        except Exception as e:
+            logging.error("peek messages: {0}".format(e))
+            messages = []
 
         if decode:
             self.decode_messages(messages)

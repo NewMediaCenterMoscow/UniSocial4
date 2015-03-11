@@ -58,8 +58,9 @@ class TaskGeneratorWorker(Worker):
                         count_tasks = self.cloud_storage_helper.get_queue_len(settings.QUEUE_TASKS)
                         count_results = self.cloud_storage_helper.get_queue_len(settings.QUEUE_RESULTS)
 
-                        if count_tasks < settings.MIN_QUEUE_LEN and count_results < settings.MIN_QUEUE_LEN:
-                            break
+                        if not (count_tasks < 0 or count_results < 0):
+                            if count_tasks < settings.MIN_QUEUE_LEN and count_results < settings.MIN_QUEUE_LEN:
+                                break
 
                         logging.info('sleeping...')
                         sleep(10.0)
