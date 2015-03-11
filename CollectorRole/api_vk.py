@@ -1,25 +1,25 @@
 import requests
+import signal
 import logging
 import datetime
 from time import sleep
 
 
-def get_list_offset(items_count, current_offset = 0, count = 100):
-    current_offset += count
-
-    if current_offset > items_count:
-        return -1
-    else:
-        return current_offset
+def timeout_handler(signum, frame):
+    raise Exception('alarm timeout')
 
 def vk_request(method, method_params, auth = None, num_try = 1, session = None):
 
+    request_interval = 10
     base_sleep_interval = 30
     
-    if num_try >= 3:
-        #sys.stdout.write('\nmax attempts...\n')
+    # check signal handker
+    if signal.getsignal(signal.SIGALRM) == signal.SIG_DFL:
+        signal.signal(signal.SIGALRM, timeout_handler) 
+
+    if num_try > 3:
         logging.error('max_attempts')
-        return {'error': true}
+        return {'error': {'error_msg': 'max_attempts'}}
 
     req = requests
     if session is not None:
@@ -31,16 +31,27 @@ def vk_request(method, method_params, auth = None, num_try = 1, session = None):
         method_params['access_token'] = auth
     
     try:
+        signal.alarm(request_interval)
+
         r = req.get('https://api.vk.com/method/' + method, params=method_params)
         result = r.json()
 
+        signal.alarm(0)
+
         return result
     except Exception as e:
-        #sys.stdout.write('\nsleeping: ' + str(baseSleepInterval ** numTry) + '\n')
-
         logging.warning(e)
         sleep(base_sleep_interval ** num_try)
         return vk_request(method, method_params, auth, num_try + 1, session)
+
+
+def get_list_offset(items_count, current_offset = 0, count = 100):
+    current_offset += count
+
+    if current_offset > items_count:
+        return -1
+    else:
+        return current_offset
 
 
 def vk_get_list(method, method_params, offset = 0, count = 100, auth = None):
