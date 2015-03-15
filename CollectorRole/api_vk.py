@@ -8,32 +8,32 @@ class TimeOutException(Exception):
     def __init__(self, message):
         super(TimeOutException, self).__init__(message)
 
-def timeout_handler(signum, frame):
-    raise TimeOutException('alarm timeout')
-
 def vk_request(method, method_params, auth = None, num_try = 1, session = None):
-
-    request_interval = 10
-    base_sleep_interval = 30
-    
-    # check signal handker
-    if signal.getsignal(signal.SIGALRM) == signal.SIG_DFL:
-        signal.signal(signal.SIGALRM, timeout_handler) 
-
-    if num_try > 3:
-        logging.error('max_attempts')
-        return {'error': {'error_msg': 'max_attempts'}}
-
-    req = requests
-    if session is not None:
-        req = session
-
-    method_params['v'] = '5.27'
-    
-    if auth is not None:
-        method_params['access_token'] = auth
-    
     try:
+
+        def timeout_handler(signum, frame):
+            raise TimeOutException('alarm timeout')
+
+        request_interval = 10
+        base_sleep_interval = 30
+    
+        # check signal handker
+        if signal.getsignal(signal.SIGALRM) == signal.SIG_DFL:
+            signal.signal(signal.SIGALRM, timeout_handler) 
+
+        if num_try > 3:
+            logging.error('max_attempts')
+            return {'error': {'error_msg': 'max_attempts'}}
+
+        req = requests
+        if session is not None:
+            req = session
+
+        method_params['v'] = '5.27'
+    
+        if auth is not None:
+            method_params['access_token'] = auth
+    
         signal.alarm(request_interval)
 
         r = req.get('https://api.vk.com/method/' + method, params=method_params)
