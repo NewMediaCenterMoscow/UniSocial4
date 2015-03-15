@@ -4,9 +4,12 @@ import logging
 import datetime
 from time import sleep
 
+class TimeOutException(Exception):
+    def __init__(self, message):
+        super(TimeOutException, self).__init__(message)
 
 def timeout_handler(signum, frame):
-    raise Exception('alarm timeout')
+    raise TimeOutException('alarm timeout')
 
 def vk_request(method, method_params, auth = None, num_try = 1, session = None):
 
@@ -39,6 +42,10 @@ def vk_request(method, method_params, auth = None, num_try = 1, session = None):
         signal.alarm(0)
 
         return result
+    except TimeOutException as te:
+        logging.warning(te)
+        sleep(base_sleep_interval)
+        return vk_request(method, method_params, auth, num_try + 1, session)
     except Exception as e:
         logging.warning(e)
         sleep(base_sleep_interval ** num_try)

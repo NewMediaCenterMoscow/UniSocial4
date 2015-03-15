@@ -57,7 +57,10 @@ class CloudStorageHelper(object):
         if encode:
             message = self.encode_message(message)
 
-        self.__queue_service.put_message(queue, message)
+        try:
+            self.__queue_service.put_message(queue, message)
+        except Exception as e:
+            logging.error("put messages: {0}".format(e))
 
     def get_messages(self, queue, num_of_messages=None, decode = True):
         try:
@@ -85,7 +88,11 @@ class CloudStorageHelper(object):
         return messages
 
     def delete_message(self, queue, message_id, popreceipt):
-        self.__queue_service.delete_message(queue, message_id, popreceipt)
+        try:
+            self.__queue_service.delete_message(queue, message_id, popreceipt)
+        except Exception as e:
+            logging.error("delete messages: {0}".format(e))
+            
 
     # Blobs
 
