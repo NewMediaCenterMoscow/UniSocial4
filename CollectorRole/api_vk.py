@@ -44,7 +44,7 @@ def vk_request(method, method_params, auth = None, num_try = 1, session = None):
         return result
     except TimeOutException as te:
         logging.warning(te)
-        sleep(base_sleep_interval)
+        sleep(base_sleep_interval ** num_try)
         return vk_request(method, method_params, auth, num_try + 1, session)
     except Exception as e:
         logging.warning(e)
