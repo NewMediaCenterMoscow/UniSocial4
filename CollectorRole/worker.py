@@ -24,7 +24,7 @@ class CollectorWorker(Worker):
             settings.REDIS_HOST, settings.REDIS_PORT, settings.REDIS_DB, settings.REDIS_PASSWORD)
         self.cloud_storage_helper = CloudStorageHelper(settings.STORAGE_ACCOUNT_NAME, settings.STORAGE_ACCOUNT_KEY)
         self.message_helper = MessageHelper()
-
+        self.vk_api = api_vk.VkApiRequest()
 
     def message_handler(self, message):
     
@@ -33,9 +33,9 @@ class CollectorWorker(Worker):
 
         if task['method'] == 'wall.get' or task['method'] == 'friends.get':
             if task['method'] == 'wall.get':
-                result = api_vk.vk_wall_get(task['input'])
+                result = self.vk_api.wall_get(task['input'])
             elif task['method'] == 'friends.get':
-                result = api_vk.vk_friends_get(task['input'])
+                result = self.vk_api.friends_get(task['input'])
 
             if 'error' in result:
                 logging.error(result['error'])
