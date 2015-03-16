@@ -1,4 +1,3 @@
-import urllib.parse
 import urllib3
 import json
 import threading
@@ -16,6 +15,9 @@ class ApiRequest():
         self.__request_result = None
 
         self.__http = urllib3.HTTPSConnectionPool(self.__base_address, maxsize=1, retries=False, timeout=self.__request_timeout)
+
+        urllib3.disable_warnings()
+
 
     def __perform_request(self, method, method_params):
         try:
