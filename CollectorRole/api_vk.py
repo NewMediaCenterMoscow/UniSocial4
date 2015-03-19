@@ -1,5 +1,6 @@
 import urllib3
 import json
+import time
 import threading
 import logging
 import datetime
@@ -16,10 +17,14 @@ class ApiRequest():
 
         self.__http = urllib3.HTTPSConnectionPool(self.__base_address, maxsize=1, retries=False, timeout=self.__request_timeout)
 
+        self.__min_request_interval = 0.3
+        self.__prev_request_time = 0.0
+
         urllib3.disable_warnings()
 
 
     def __perform_request(self, method, method_params):
+        self.__prev_request_time = time.time()
         try:
             r = self.__http.request('GET', method, fields = method_params)
 
@@ -27,11 +32,18 @@ class ApiRequest():
             json_res = json.loads(str_data)
 
             self.__request_result = json_res
+
         except Exception as e:
             logging.error(e)
             self.__request_result = {'error': {'error_msg': str(e)}}
 
     def request(self, method, method_params, num_try = 1):
+        need_sleep_time = self.__min_request_interval - (time.time() - self.__prev_request_time)
+        if need_sleep_time > 0:
+            logging.debug("sleep " + str(need_sleep_time))
+            sleep(need_sleep_time)
+
+
         if num_try > 3:
             logging.error('max attempts')
             return {'error': {'error_msg': 'max attempts'}}
