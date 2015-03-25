@@ -12,13 +12,15 @@ import bottle
 from bottle import default_app, redirect, route, post, request, view, template, url
 
 from bottle_helpers import view_template
-import settings
 
 
 sys.path.insert(0, '../CommonLibs/')
 from CloudQueueStorage import CloudQueueStorage
 from CloudStorageHelper import CloudStorageHelper
 from MessageHelper import MessageHelper  
+
+import settings
+
 
 
 if '--debug' in sys.argv[1:] or 'SERVER_DEBUG' in os.environ:
