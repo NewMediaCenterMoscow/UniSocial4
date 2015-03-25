@@ -35,6 +35,8 @@
     <Compile Include="MessageHelper.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="settings.py" />
+    <Compile Include="settings_local.py" />
     <Compile Include="WorkerHelper.py">
       <SubType>Code</SubType>
     </Compile>

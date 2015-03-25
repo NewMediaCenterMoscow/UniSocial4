@@ -36,8 +36,6 @@
     <Compile Include="FileWriter.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="settings.py" />
-    <Compile Include="settings_local.py" />
     <Compile Include="worker.py" />
     <Content Include="bin\ConfigureCloudService.ps1" />
     <Content Include="bin\LaunchWorker.ps1" />
