@@ -209,6 +209,36 @@ class VkApiRequest(ApiRequest):
 
         return result['response']['items']
 
-    def comments_get(self, id):
-        pass
+    def wall_get_comments(self, owner_id, post_id):
+        method = 'wall.getComments'
+        params = {
+            'owner_id': owner_id,
+            'post_id': post_id,
+            'need_likes': 1,
+
+        }
+
+        result = self.__get_list(method, params, offset = 0, count = 100)
+
+        if 'error' in result:
+            return {'error': result['error']['error_msg']}
+
+        # delete extra data
+        for p in result:
+            # set likes/comments/reposts count
+            if 'likes' in p:
+                p['likes_count'] = p['likes']['count']
+                p.pop('likes', None)
+            else:
+                p['likes_count'] = 0
+
+            # delete attachments but save links
+            if 'attachments' in p:
+                p['attachments'] = [a['link']['url'] for a in p['attachments'] if a['type'] == 'link']
+            else:
+                p['attachments'] = []
+
+
+        return result       
+
 

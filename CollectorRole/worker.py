@@ -26,16 +26,33 @@ class CollectorWorker(Worker):
         self.message_helper = MessageHelper()
         self.vk_api = api_vk.VkApiRequest()
 
+        self.__methods = {
+            'wall.get': self.__wall_get,
+            'wall.getComments': self.__wall_get_comments,
+            'friends.get': self.__friends_get,
+        }
+
+
+    def __wall_get(self, task):
+        result = self.vk_api.wall_get(task['input'])
+        return result
+    def __friends_get(self, task):
+        result = self.vk_api.friends_get(task['input'])
+        return result
+    def __wall_get_comments(self, task):
+        input_data = task['input'].split('_')
+        task['input'] = {'owner_id': input_data[0], 'post_id': input_data[1]} 
+        result = self.vk_api.wall_get_comments(task['input']['owner_id'], task['input']['post_id'])
+        return result
+
     def message_handler(self, message):
     
         task = self.message_helper.parse_task_message(message.message_text)
         logging.info(task)
 
-        if task['method'] == 'wall.get' or task['method'] == 'friends.get':
-            if task['method'] == 'wall.get':
-                result = self.vk_api.wall_get(task['input'])
-            elif task['method'] == 'friends.get':
-                result = self.vk_api.friends_get(task['input'])
+        if task['method'] in self.__methods:
+            api_func = self.__methods[task['method']]
+            result = api_func(task)
 
             if 'error' in result:
                 logging.error(result['error'])
@@ -70,7 +87,7 @@ class CollectorWorker(Worker):
 if __name__ == '__main__':
 
     #logging.basicConfig(filename='debug.log',level=logging.DEBUG)
-    logging.basicConfig(level=logging.DEBUG, format="[C] %(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S")
+    logging.basicConfig(level=logging.INFO, format="[C] %(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S")
     logging.info("starting...")
 
     worker = CollectorWorker()

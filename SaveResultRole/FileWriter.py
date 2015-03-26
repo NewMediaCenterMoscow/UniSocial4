@@ -13,8 +13,14 @@ class FileWriter(AbstractWriter):
 
         self.__data_dir = data_dir
 
-    def __save_values(self, task, values):
-        filename = os.path.join(self.__data_dir, task['method'] + '_' + task['input'] + '.csv')
+        self.__methods = {
+            'wall.get': self.__save_wall_get,
+            'wall.getComments': self.__save_wall_get_comments,
+            'friends.get': self.__save_friends_get,
+        }
+
+    def __save_values(self, filename, task, values):
+        filename = os.path.join(self.__data_dir, filename)
 
         with open(filename, 'a') as file:
             writer = csv.writer(file)
@@ -37,8 +43,9 @@ class FileWriter(AbstractWriter):
             row['copy_text'] if 'copy_text' in row else '',
             '|'.join(row['attachments'])
         ) for row in results]
-
-        self.__save_values(task, values)
+        
+        filename = task['method'] + '_' + task['input'] + '.csv'
+        self.__save_values(filename, task, values)
 
 
     def __save_friends_get(self, task, results):
@@ -47,14 +54,34 @@ class FileWriter(AbstractWriter):
                row,
         ) for row in results]
 
-        self.__save_values(task, values)
+        filename = task['method'] + '_' + task['input'] + '.csv'
+        self.__save_values(filename, task, values)
 
+
+    def __save_wall_get_comments(self, task, results):
+        values = [(
+            task['input']['owner_id'],
+            task['input']['post_id'],
+            row['id'], 
+            row['from_id'],
+            datetime.datetime.fromtimestamp(row['date']).strftime('%Y-%m-%d %H:%M:%S'), 
+            row['text'], 
+            row['likes_count'],
+            '|'.join(row['attachments'])
+        ) for row in results]
+
+        filename = task['method'] + '_' + task['input']['owner_id'] + '_' + task['input']['post_id'] + '.csv'
+        self.__save_values(filename, task, values)
 
 
     def save_results(self, task, data):
-        if task['method'] == 'wall.get':
-            self.__save_wall_get(task, data)
-        if task['method'] == 'friends.get':
-            self.__save_friends_get(task, data)       
+        if task['method'] in self.__methods:
+            mthd = self.__methods[task['method']]
+            mthd(task, data)
+           
+            
+            
+            
+   
 
 
