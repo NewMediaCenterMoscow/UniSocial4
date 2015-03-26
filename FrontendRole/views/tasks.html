@@ -13,7 +13,13 @@
 			<legend>Add new task</legend>
 
 			<label for="method">Method</label><br />
-			<input name="method" id="method" type="text" value="wall.get" /><br />
+			<select name="method" id="method">
+				% for m in methods:
+				<option value="{{ m }}">{{ m }}</option>
+				% end
+			</select>
+			<br />
+
 
 			<label for="input">Dataset</label><br />
 			<!--<input name="input" id="input" type="text" /><br />-->

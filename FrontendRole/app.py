@@ -35,10 +35,11 @@ if '--debug' in sys.argv[1:] or 'SERVER_DEBUG' in os.environ:
 def tasks():
 
     tasks = [{'name': 'Task 1'},{'name': 'Task 2'}]
-
+    methods = ['wall.get','wall.getComments','friends.get']
     datasets = cloud_storage_helper.get_blobs_list(settings.BLOB_DATA_CONTAINER)
 
-    return view_template(tasks=tasks, datasets = datasets)
+
+    return view_template(tasks = tasks, datasets = datasets, methods = methods)
 
 
 @post('/tasks/add', name='tasks_add')
