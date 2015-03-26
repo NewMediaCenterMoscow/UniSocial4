@@ -5,6 +5,7 @@ import threading
 import logging
 import datetime
 from time import sleep
+from urllib3.util.retry import Retry
 
 class ApiRequest():
     def __init__(self, base_address):
@@ -15,16 +16,22 @@ class ApiRequest():
 
         self.__request_result = None
 
-        self.__http = urllib3.HTTPSConnectionPool(self.__base_address, maxsize=1, retries=False, timeout=self.__request_timeout)
+        self.__http = urllib3.HTTPSConnectionPool(self.__base_address, maxsize=1, retries=Retry(False), timeout=self.__request_timeout)
 
-        self.__min_request_interval = 0.3
-        self.__prev_request_time = 0.0
+        self.__request_interval = 0.1
+        self.__request_interval_max = 1.0
+        self.__request_interval_min = 0.0
+        self.__request_prev_time = 0.0
+        
+        self.__stat_prev_time = 0.0
+        self.__stat_period = 5.0
+        self.__stat_number_of_requests = 0
 
         urllib3.disable_warnings()
 
 
     def __perform_request(self, method, method_params):
-        self.__prev_request_time = time.time()
+        self.__request_prev_time = time.time()
         try:
             r = self.__http.request('GET', method, fields = method_params)
 
@@ -38,7 +45,9 @@ class ApiRequest():
             self.__request_result = {'error': {'error_msg': str(e)}}
 
     def request(self, method, method_params, num_try = 1):
-        need_sleep_time = self.__min_request_interval - (time.time() - self.__prev_request_time)
+        current_time = time.time()
+
+        need_sleep_time = self.__request_interval - (current_time - self.__request_prev_time)
         if need_sleep_time > 0:
             logging.debug("sleep " + str(need_sleep_time))
             sleep(need_sleep_time)
@@ -58,12 +67,32 @@ class ApiRequest():
                 thread.join()
                 raise Exception(self.__request_result['error']['error_msg'])
 
+            # success request - try to minmize request time
+            current_time = time.time()
+
+            self.__stat_number_of_requests += 1
+            if self.__request_interval > self.__request_interval_min:
+                self.__request_interval -= 0.1
+
+            elapsed_time = current_time - self.__stat_prev_time
+            if elapsed_time > self.__stat_period:
+                message = '{0} requests in {1:.2f} sec. current request interval: {2}'.format(self.__stat_number_of_requests, elapsed_time, self.__request_interval)
+                logging.info(message)
+                self.__stat_number_of_requests = 0
+                self.__stat_prev_time = current_time
+
             return self.__request_result
 
         except Exception as e:
             sleep_interval = self.__sleep_interval_base ** num_try
+
+            # increase request time
+            if self.__request_interval < self.__request_interval_max:
+                self.__request_interval += 0.1
+
             logging.warning('repeat #' + str(num_try) + ' in ' + str(sleep_interval) + ' sec - ' + str(e))
             sleep(sleep_interval)
+            
             return self.request(method, method_params, num_try + 1)
 
 
@@ -71,8 +100,9 @@ class VkApiRequest(ApiRequest):
     def __init__(self):
         ApiRequest.__init__(self, 'api.vk.com')
 
-    def request(self, method, method_params, auth = None, num_try = 1):
-        method = '/method/' + method
+    def request(self, method, method_params, num_try = 1, auth = None):
+        if not method.startswith('/method/'):
+            method = '/method/' + method
 
         method_params['v'] = '5.27'
 
@@ -97,7 +127,7 @@ class VkApiRequest(ApiRequest):
         result = []
         i = 0
         while True:
-            tmp_res = self.request(method, method_params, auth)
+            tmp_res = self.request(method, method_params, auth=auth)
 
             if 'error' in tmp_res:
                 return tmp_res
@@ -178,3 +208,7 @@ class VkApiRequest(ApiRequest):
             return {'error': result['error']['error_msg']}
 
         return result['response']['items']
+
+    def comments_get(self, id):
+        pass
+
