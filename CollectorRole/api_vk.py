@@ -242,3 +242,20 @@ class VkApiRequest(ApiRequest):
         return result       
 
 
+    def likes_get_list(self, type, owner_id, item_id):
+        method = 'likes.getList'
+        params = {
+            'type': type,
+            'owner_id': owner_id,
+            'item_id': item_id,
+
+        }
+
+        result = self.__get_list(method, params, offset = 0, count = 1000)
+
+        if 'error' in result:
+            return {'error': result['error']['error_msg']}
+
+
+        return result     
+		

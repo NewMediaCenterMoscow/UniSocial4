@@ -30,6 +30,7 @@ class CollectorWorker(Worker):
             'wall.get': self.__wall_get,
             'wall.getComments': self.__wall_get_comments,
             'friends.get': self.__friends_get,
+            'likes.getList': self.__likes_get_list,
         }
 
 
@@ -44,6 +45,13 @@ class CollectorWorker(Worker):
         task['input'] = {'owner_id': input_data[0], 'post_id': input_data[1]} 
         result = self.vk_api.wall_get_comments(task['input']['owner_id'], task['input']['post_id'])
         return result
+    def __likes_get_list(self, task):
+        input_data = task['input'].split('_')
+        task['input'] = {'type':input_data[0], 'owner_id': input_data[1], 'item_id': input_data[2]} 
+        result = self.vk_api.likes_get_list(task['input']['type'], task['input']['owner_id'], task['input']['item_id'])
+        return result
+
+
 
     def message_handler(self, message):
     

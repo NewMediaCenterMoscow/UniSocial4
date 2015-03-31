@@ -17,6 +17,7 @@ class FileWriter(AbstractWriter):
             'wall.get': self.__save_wall_get,
             'wall.getComments': self.__save_wall_get_comments,
             'friends.get': self.__save_friends_get,
+            'likes.getList': self.__save_likes_get_list,
         }
 
     def __save_values(self, filename, task, values):
@@ -71,6 +72,17 @@ class FileWriter(AbstractWriter):
         ) for row in results]
 
         filename = task['method'] + '_' + task['input']['owner_id'] + '_' + task['input']['post_id'] + '.csv'
+        self.__save_values(filename, task, values)
+
+    def __save_likes_get_list(self, task, results):
+        values = [(
+                task['input']['type'],
+                task['input']['owner_id'],
+                task['input']['item_id'],
+               row,
+        ) for row in results]
+
+        filename = task['method'] + '_' + task['input']['type'] + '_' + task['input']['owner_id'] + '_' + task['input']['item_id'] + '.csv'
         self.__save_values(filename, task, values)
 
 
