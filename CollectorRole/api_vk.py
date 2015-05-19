@@ -111,15 +111,15 @@ class VkApiRequest(ApiRequest):
 
         return ApiRequest.request(self, method, method_params, num_try)
 
-    def __get_list_offset(self, items_count, current_offset = 0, count = 100):
+    def __get_list_offset(self, items_count, current_offset = 0, count = 100, limit = 0):
         current_offset += count
 
-        if current_offset > items_count:
+        if current_offset > items_count or (limit != 0 and items_count >= limit):
             return -1
         else:
             return current_offset
 
-    def __get_list(self, method, method_params, offset = 0, count = 100, auth = None):
+    def __get_list(self, method, method_params, offset = 0, count = 100, limit = 0, auth = None):
 
         method_params['offset'] = offset
         method_params['count'] = count
@@ -135,7 +135,7 @@ class VkApiRequest(ApiRequest):
             result.extend(tmp_res['response']['items'])
 
             items_count = tmp_res['response']['count']
-            offset = self.__get_list_offset(items_count, offset, count)
+            offset = self.__get_list_offset(items_count, offset, count, limit)
 
             if offset == -1:
                 break
@@ -153,7 +153,7 @@ class VkApiRequest(ApiRequest):
 
     # api methods
 
-    def wall_get(self, id, custom_perameters = None):
+    def wall_get(self, id, custom_perameters = None, limit = 0):
         method = 'wall.get'
         params = {
             'owner_id': id,
@@ -161,8 +161,13 @@ class VkApiRequest(ApiRequest):
         }
         if custom_perameters is not None:
             params.update(custom_perameters)
+        
+        count = 100
+        if 'count' in params:
+            count = params['count']
 
-        result = self.__get_list(method, params, offset = 0, count = 100)
+
+        result = self.__get_list(method, params, offset = 0, count = count, limit = limit)
 
         if 'error' in result:
             return {'error': result['error']['error_msg']}
@@ -213,7 +218,7 @@ class VkApiRequest(ApiRequest):
 
         return result['response']['items']
 
-    def wall_get_comments(self, owner_id, post_id, custom_perameters = None):
+    def wall_get_comments(self, owner_id, post_id, custom_perameters = None, limit = 0):
         method = 'wall.getComments'
         params = {
             'owner_id': owner_id,
@@ -224,7 +229,11 @@ class VkApiRequest(ApiRequest):
         if custom_perameters is not None:
             params.update(custom_perameters)
 
-        result = self.__get_list(method, params, offset = 0, count = 100)
+        count = 100
+        if 'count' in params:
+            count = params['count']
+
+        result = self.__get_list(method, params, offset = 0, count = count, limit = limit)
 
         if 'error' in result:
             return {'error': result['error']['error_msg']}
@@ -248,7 +257,7 @@ class VkApiRequest(ApiRequest):
         return result       
 
 
-    def likes_get_list(self, type, owner_id, item_id, custom_perameters = None):
+    def likes_get_list(self, type, owner_id, item_id, custom_perameters = None, limit = 0):
         method = 'likes.getList'
         params = {
             'type': type,
@@ -259,7 +268,11 @@ class VkApiRequest(ApiRequest):
         if custom_perameters is not None:
             params.update(custom_perameters)
 
-        result = self.__get_list(method, params, offset = 0, count = 1000)
+        count = 1000
+        if 'count' in params:
+            count = params['count']
+
+        result = self.__get_list(method, params, offset = 0, count = count, limit = limit)
 
         if 'error' in result:
             return {'error': result['error']['error_msg']}
