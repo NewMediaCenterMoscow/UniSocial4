@@ -153,12 +153,14 @@ class VkApiRequest(ApiRequest):
 
     # api methods
 
-    def wall_get(self, id):
+    def wall_get(self, id, custom_perameters = None):
         method = 'wall.get'
         params = {
             'owner_id': id,
             'filter': 'all',
         }
+        if custom_perameters is not None:
+            params.update(custom_perameters)
 
         result = self.__get_list(method, params, offset = 0, count = 100)
 
@@ -195,12 +197,14 @@ class VkApiRequest(ApiRequest):
         return result
 
 
-    def friends_get(self, id):
+    def friends_get(self, id, custom_perameters = None):
         method = 'friends.get'
         params = {
             'user_id': id,
             'filter': 'all',
         }
+        if custom_perameters is not None:
+            params.update(custom_perameters)
 
         result = self.request(method, params)
 
@@ -209,7 +213,7 @@ class VkApiRequest(ApiRequest):
 
         return result['response']['items']
 
-    def wall_get_comments(self, owner_id, post_id):
+    def wall_get_comments(self, owner_id, post_id, custom_perameters = None):
         method = 'wall.getComments'
         params = {
             'owner_id': owner_id,
@@ -217,6 +221,8 @@ class VkApiRequest(ApiRequest):
             'need_likes': 1,
 
         }
+        if custom_perameters is not None:
+            params.update(custom_perameters)
 
         result = self.__get_list(method, params, offset = 0, count = 100)
 
@@ -242,7 +248,7 @@ class VkApiRequest(ApiRequest):
         return result       
 
 
-    def likes_get_list(self, type, owner_id, item_id):
+    def likes_get_list(self, type, owner_id, item_id, custom_perameters = None):
         method = 'likes.getList'
         params = {
             'type': type,
@@ -250,6 +256,8 @@ class VkApiRequest(ApiRequest):
             'item_id': item_id,
 
         }
+        if custom_perameters is not None:
+            params.update(custom_perameters)
 
         result = self.__get_list(method, params, offset = 0, count = 1000)
 
@@ -258,4 +266,4 @@ class VkApiRequest(ApiRequest):
 
 
         return result     
-		
+        
