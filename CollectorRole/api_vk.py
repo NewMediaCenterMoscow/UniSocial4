@@ -1,4 +1,4 @@
-import urllib3
+﻿import urllib3
 import json
 import time
 import threading
@@ -150,6 +150,13 @@ class VkApiRequest(ApiRequest):
 
         return result
 
+    def __chunks(self, l, n):
+        """ Yield successive n-sized chunks from l.
+        http://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks-in-python
+        """
+        for i in range(0, len(l), n):
+            yield l[i:i+n]
+
 
     # api methods
 
@@ -280,3 +287,25 @@ class VkApiRequest(ApiRequest):
 
         return result     
         
+    def users_get(self, ids, custom_perameters = None):
+        method = 'users.get'
+        params = {
+            'fields': 'education,contacts,nickname, screen_name, sex, bdate, city, country, timezone, photo_50, photo_100, photo_200, photo_max, has_mobile',
+        }
+        if custom_perameters is not None:
+            params.update(custom_perameters)
+
+        batch_size = 1000
+        result = []
+
+        for ids_batch in self.__chunks(ids, batch_size):
+            params['user_ids'] = ','.join(ids_batch)
+            partial_result = self.request(method, params)
+
+            if 'error' in partial_result:
+                return {'error': result['error']['error_msg']}
+
+            result.extend(partial_result['response'])
+
+        return result
+

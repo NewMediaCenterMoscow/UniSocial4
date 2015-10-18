@@ -1,4 +1,4 @@
-import os
+﻿import os
 import csv
 import logging
 import datetime
@@ -18,6 +18,7 @@ class FileWriter(AbstractWriter):
             'wall.getComments': self.__save_wall_get_comments,
             'friends.get': self.__save_friends_get,
             'likes.getList': self.__save_likes_get_list,
+            'users.get': self.__save_users_get, 
         }
 
     def __save_values(self, filename, task, values):
@@ -83,6 +84,39 @@ class FileWriter(AbstractWriter):
         ) for row in results]
 
         filename = task['method'] + '_' + task['input']['type'] + '_' + task['input']['owner_id'] + '_' + task['input']['item_id'] + '.csv'
+        self.__save_values(filename, task, values)
+
+    def __save_users_get(self, task, results):
+        values = [(
+            row['id'],
+            row['first_name'],
+            row['last_name'],
+            row['sex'],
+            row['nickname'],
+            row['screen_name'],
+            row['bdate'] if 'bdate' in row else '',
+            row['city']['id'] if 'city' in row else '',
+            row['country']['id'] if 'country' in row else '',
+            True if 'deactivated' in row else False,
+            row['photo_50'],
+            row['photo_100'],
+            row['photo_200'],
+            row['photo_max'],
+            row['has_mobile'],
+            row['mobile_phone'] if 'mobile_phone' in row else '',
+            row['home_phone'] if 'home_phone' in row else '',
+            row['university'] if 'university' in row else '',
+            row['university_name'] if 'university_name' in row else '',
+            row['faculity'] if 'faculity' in row else '',
+            row['faculity_name'] if 'faculity_name' in row else '',
+            row['graduation'] if 'graduation' in row else '',
+        ) for row in results]
+
+        if 'output_file' in task:
+            filename = task['output_file']
+        else:
+            filename = task['method'] + '_' + str(len(task['input'])) + '.csv'
+
         self.__save_values(filename, task, values)
 
 
