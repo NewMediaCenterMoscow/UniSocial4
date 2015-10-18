@@ -298,6 +298,9 @@ class VkApiRequest(ApiRequest):
         batch_size = 1000
         result = []
 
+        if not isinstance(ids, list):
+            ids = list(ids)
+
         for ids_batch in self.__chunks(ids, batch_size):
             params['user_ids'] = ','.join(ids_batch)
             partial_result = self.request(method, params)
