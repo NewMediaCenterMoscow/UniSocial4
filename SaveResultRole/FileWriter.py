@@ -39,10 +39,10 @@ class FileWriter(AbstractWriter):
             row['comments_count'], # add 's' at the end (comment_count <- comments_count)
             row['likes_count'],  # add 's' at the end
             row['reposts_count'],  # add 's' at the end
-            row['copy_id'] if 'copy_id' in row else 0, 
-            row['copy_from_id'] if 'copy_from_id' in row else 0,
-            row['copy_to_id'] if 'copy_to_id' in row else 0,
-            row['copy_text'] if 'copy_text' in row else '',
+            row.get('copy_id',0) 
+            row.get('copy_from_id',0),
+            row.get('copy_to_id',0),
+            row.get('copy_text',''),
             '|'.join(row['attachments'])
         ) for row in results]
         
@@ -92,24 +92,24 @@ class FileWriter(AbstractWriter):
             row['first_name'],
             row['last_name'],
             row['sex'],
-            row['nickname'],
-            row['screen_name'],
-            row['bdate'] if 'bdate' in row else '',
+            row.get('nickname', ''),
+            row.get('screen_name', ''),
+            row.get('bdate', ''),
             row['city']['id'] if 'city' in row else '',
             row['country']['id'] if 'country' in row else '',
             True if 'deactivated' in row else False,
-            row['photo_50'],
-            row['photo_100'],
-            row['photo_200'],
-            row['photo_max'],
-            row['has_mobile'],
-            row['mobile_phone'] if 'mobile_phone' in row else '',
-            row['home_phone'] if 'home_phone' in row else '',
-            row['university'] if 'university' in row else '',
-            row['university_name'] if 'university_name' in row else '',
-            row['faculity'] if 'faculity' in row else '',
-            row['faculity_name'] if 'faculity_name' in row else '',
-            row['graduation'] if 'graduation' in row else '',
+            row.get('photo_50', ''),
+            row.get('photo_100',''),
+            row.get('photo_200',''),
+            row.get('photo_max',''),
+            row.get('has_mobile',0),
+            row.get('mobile_phone',''),
+            row.get('home_phone',''),
+            row.get('university',''),
+            row.get('university_name',''),
+            row.get('faculity',''),
+            row.get('faculity_name',''),
+            row.get('graduation',''),
         ) for row in results]
 
         if 'output_file' in task:
