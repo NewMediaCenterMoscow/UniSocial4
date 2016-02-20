@@ -121,6 +121,9 @@ class FileWriter(AbstractWriter):
 
 
     def save_results(self, task, data):
+        if isinstance(data, dict) and 'error' in data:
+            return	
+	
         if task['method'] in self.__methods:
             mthd = self.__methods[task['method']]
             mthd(task, data)
