@@ -18,7 +18,7 @@ class FileWriter(AbstractWriter):
             'wall.getComments': self.__save_wall_get_comments,
             'friends.get': self.__save_friends_get,
             'likes.getList': self.__save_likes_get_list,
-            'users.get': self.__save_users_get, 
+            'users.get': self.__save_users_get,
         }
 
     def __save_values(self, filename, task, values):
@@ -30,29 +30,29 @@ class FileWriter(AbstractWriter):
 
     def __save_wall_get(self, task, results):
         values = [(
-            row['id'], 
+            row['id'],
             row['from_id'],
             row['owner_id'], # to_id <- owner_id
-            datetime.datetime.fromtimestamp(row['date']).strftime('%Y-%m-%d %H:%M:%S'), 
+            datetime.datetime.fromtimestamp(row['date']).strftime('%Y-%m-%d %H:%M:%S'),
             row['post_type'], # type <- post_type
-            row['text'], 
+            row['text'],
             row['comments_count'], # add 's' at the end (comment_count <- comments_count)
-            row['likes_count'],  # add 's' at the end
-            row['reposts_count'],  # add 's' at the end
-            row.get('copy_id',0) 
-            row.get('copy_from_id',0),
-            row.get('copy_to_id',0),
-            row.get('copy_text',''),
+            row['likes_count'], # add 's' at the end
+            row['reposts_count'], # add 's' at the end
+            row.get('copy_id', 0),
+            row.get('copy_from_id', 0),
+            row.get('copy_to_id', 0),
+            row.get('copy_text', ''),
             '|'.join(row['attachments'])
         ) for row in results]
-        
+
         filename = task['method'] + '_' + task['input'] + '.csv'
         self.__save_values(filename, task, values)
 
 
     def __save_friends_get(self, task, results):
         values = [(
-               task['input'], 
+               task['input'],
                row,
         ) for row in results]
 
@@ -64,10 +64,10 @@ class FileWriter(AbstractWriter):
         values = [(
             task['input']['owner_id'],
             task['input']['post_id'],
-            row['id'], 
+            row['id'],
             row['from_id'],
-            datetime.datetime.fromtimestamp(row['date']).strftime('%Y-%m-%d %H:%M:%S'), 
-            row['text'], 
+            datetime.datetime.fromtimestamp(row['date']).strftime('%Y-%m-%d %H:%M:%S'),
+            row['text'],
             row['likes_count'],
             '|'.join(row['attachments'])
         ) for row in results]
@@ -99,17 +99,17 @@ class FileWriter(AbstractWriter):
             row['country']['id'] if 'country' in row else '',
             True if 'deactivated' in row else False,
             row.get('photo_50', ''),
-            row.get('photo_100',''),
-            row.get('photo_200',''),
-            row.get('photo_max',''),
-            row.get('has_mobile',0),
-            row.get('mobile_phone',''),
-            row.get('home_phone',''),
-            row.get('university',''),
-            row.get('university_name',''),
-            row.get('faculity',''),
-            row.get('faculity_name',''),
-            row.get('graduation',''),
+            row.get('photo_100', ''),
+            row.get('photo_200', ''),
+            row.get('photo_max', ''),
+            row.get('has_mobile', 0),
+            row.get('mobile_phone', ''),
+            row.get('home_phone', ''),
+            row.get('university', ''),
+            row.get('university_name', ''),
+            row.get('faculity', ''),
+            row.get('faculity_name', ''),
+            row.get('graduation', ''),
         ) for row in results]
 
         if 'output_file' in task:
@@ -122,15 +122,15 @@ class FileWriter(AbstractWriter):
 
     def save_results(self, task, data):
         if isinstance(data, dict) and 'error' in data:
-            return	
-	
+            return
+
         if task['method'] in self.__methods:
             mthd = self.__methods[task['method']]
             mthd(task, data)
-           
-            
-            
-            
-   
+
+
+
+
+
 
 
