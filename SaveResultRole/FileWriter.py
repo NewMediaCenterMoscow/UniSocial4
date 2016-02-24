@@ -1,5 +1,6 @@
-﻿import os
+import os
 import csv
+import codecs
 import logging
 import datetime
 
@@ -24,7 +25,7 @@ class FileWriter(AbstractWriter):
     def __save_values(self, filename, task, values):
         filename = os.path.join(self.__data_dir, filename)
 
-        with open(filename, 'a') as file:
+        with codecs.open(filename, 'a', encoding="utf-8") as file:
             writer = csv.writer(file)
             writer.writerows(values)
 
