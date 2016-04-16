@@ -1,8 +1,10 @@
 import os
+import sys
 import csv
 import codecs
 import logging
 import datetime
+import base64
 
 from AbstractWriter import AbstractWriter
 
@@ -20,6 +22,7 @@ class FileWriter(AbstractWriter):
             'friends.get': self.__save_friends_get,
             'likes.getList': self.__save_likes_get_list,
             'users.get': self.__save_users_get,
+            'newsfeed.search': self.__save_newsfeed_search,
         }
 
     def __save_values(self, filename, task, values):
@@ -121,15 +124,40 @@ class FileWriter(AbstractWriter):
         self.__save_values(filename, task, values)
 
 
+    def __save_newsfeed_search(self, task, results):
+        values = [(
+            task['query'],
+            row['id'],
+            row['from_id'],
+            row['owner_id'], # to_id <- owner_id
+            row.get('post_id', 0),
+            row['post_type'],
+            datetime.datetime.fromtimestamp(row['date']).strftime('%Y-%m-%d %H:%M:%S'),
+            row['text'],
+            row['comments_count'], # add 's' at the end (comment_count <- comments_count)
+            row['likes_count'], # add 's' at the end
+            row['reposts_count'], # add 's' at the end
+            '|'.join(row['attachments'])
+        ) for row in results]
+
+        if 'output_file' in task:
+            filename = task['output_file']
+        else:
+            filename = task['method'] + '_' + base64.urlsafe_b64encode(task['query'].encode()).decode() + '.csv'
+
+        self.__save_values(filename, task, values)
+
+
+
+
     def save_results(self, task, data):
         if isinstance(data, dict) and 'error' in data:
+            print("Save error!", file=sys.stderr)
             return
 
         if task['method'] in self.__methods:
             mthd = self.__methods[task['method']]
             mthd(task, data)
-
-
 
 
 

@@ -101,6 +101,25 @@ def walls(input_file, output_dir):
     click.echo('All done!')
 
 
+@main.command('search')
+@click.argument('query')
+@click.argument('output_dir', type=click.Path(exists=True, file_okay=False, dir_okay=True, writable=True))
+@click.option('--output_file', default=None, help='Filename to sve the results')
+def search(query, output_dir, output_file):
+
+    task = {'method': 'newsfeed.search', 'query': query}
+    if output_file is not None:
+        task['output_file'] = output_file
+
+    api = VkApiRequest()
+    results = api.newsfeed_search(query)
+
+    if not check_error(results):
+        writer = FileWriter(output_dir)
+        writer.save_results(task, results)
+
+    click.echo('All done!')
+
 
 
 

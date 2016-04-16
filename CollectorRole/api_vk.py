@@ -7,6 +7,7 @@ import datetime
 from time import sleep
 from urllib3.util.retry import Retry
 
+
 class ApiRequest():
     def __init__(self, base_address):
         self.__base_address = base_address
@@ -22,7 +23,7 @@ class ApiRequest():
         self.__request_interval_max = 1.0
         self.__request_interval_min = 0.0
         self.__request_prev_time = 0.0
-        
+
         self.__stat_prev_time = 0.0
         self.__stat_period = 5.0
         self.__stat_number_of_requests = 0
@@ -33,9 +34,9 @@ class ApiRequest():
     def __perform_request(self, method, method_params):
         self.__request_prev_time = time.time()
         try:
-            r = self.__http.request('GET', method, fields = method_params)
+            r = self.__http.request('GET', method, fields=method_params)
 
-            str_data = r.data.decode('utf-8') #str(r.data, 'utf-8', errors='replace')
+            str_data = r.data.decode('utf-8') # str(r.data, 'utf-8', errors='replace')
             json_res = json.loads(str_data)
 
             self.__request_result = json_res
@@ -44,7 +45,7 @@ class ApiRequest():
             logging.error(e)
             self.__request_result = {'error': {'error_msg': str(e)}}
 
-    def request(self, method, method_params, num_try = 1):
+    def request(self, method, method_params, num_try=1):
         current_time = time.time()
 
         need_sleep_time = self.__request_interval - (current_time - self.__request_prev_time)
@@ -92,7 +93,7 @@ class ApiRequest():
 
             logging.warning('repeat #' + str(num_try) + ' in ' + str(sleep_interval) + ' sec - ' + str(e))
             sleep(sleep_interval)
-            
+
             return self.request(method, method_params, num_try + 1)
 
 
@@ -100,18 +101,23 @@ class VkApiRequest(ApiRequest):
     def __init__(self):
         ApiRequest.__init__(self, 'api.vk.com')
 
-    def request(self, method, method_params, num_try = 1, auth = None):
+        self.__next_from_methods = ['newsfeed.search']
+        self.__version = '5.27'
+
+
+
+    def request(self, method, method_params, num_try=1, auth=None):
         if not method.startswith('/method/'):
             method = '/method/' + method
 
-        method_params['v'] = '5.27'
+        method_params['v'] = self.__version
 
         if auth is not None:
             method_params['access_token'] = auth
 
         return ApiRequest.request(self, method, method_params, num_try)
 
-    def __get_list_offset(self, items_count, current_offset = 0, count = 100, limit = 0):
+    def __get_list_offset(self, items_count, current_offset=0, count=100, limit=0):
         current_offset += count
 
         if current_offset > items_count or (limit != 0 and items_count >= limit):
@@ -119,10 +125,18 @@ class VkApiRequest(ApiRequest):
         else:
             return current_offset
 
-    def __get_list(self, method, method_params, offset = 0, count = 100, limit = 0, auth = None):
+    def __get_list(self, method, method_params, offset=0, count=100, limit=0, auth=None):
 
-        method_params['offset'] = offset
-        method_params['count'] = count
+        if method in self.__next_from_methods:
+            next_from_method = True
+        else:
+            next_from_method = False
+
+        if not next_from_method:
+            method_params['offset'] = offset
+            method_params['count'] = count
+        else:
+            method_params['count'] = count
 
         result = []
         i = 0
@@ -134,13 +148,20 @@ class VkApiRequest(ApiRequest):
 
             result.extend(tmp_res['response']['items'])
 
-            items_count = tmp_res['response']['count']
-            offset = self.__get_list_offset(items_count, offset, count, limit)
+            if not next_from_method:
+                items_count = tmp_res['response']['count']
+                offset = self.__get_list_offset(items_count, offset, count, limit)
 
-            if offset == -1:
-                break
+                if offset == -1:
+                    break
 
-            method_params['offset'] = offset
+                method_params['offset'] = offset
+            else:
+                if 'next_from' in tmp_res['response']:
+                    method_params['start_from'] = tmp_res['response']['next_from']
+                else:
+                    break
+
             i += 1
 
             if i % 25 == 0:
@@ -155,12 +176,12 @@ class VkApiRequest(ApiRequest):
         http://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks-in-python
         """
         for i in range(0, len(l), n):
-            yield l[i:i+n]
+            yield l[i:i + n]
 
 
     # api methods
 
-    def wall_get(self, id, custom_perameters = None, limit = 0):
+    def wall_get(self, id, custom_perameters=None, limit=0):
         method = 'wall.get'
         params = {
             'owner_id': id,
@@ -168,13 +189,13 @@ class VkApiRequest(ApiRequest):
         }
         if custom_perameters is not None:
             params.update(custom_perameters)
-        
+
         count = 100
         if 'count' in params:
             count = params['count']
 
 
-        result = self.__get_list(method, params, offset = 0, count = count, limit = limit)
+        result = self.__get_list(method, params, offset=0, count=count, limit=limit)
 
         if 'error' in result:
             return {'error': result['error']['error_msg']}
@@ -209,7 +230,7 @@ class VkApiRequest(ApiRequest):
         return result
 
 
-    def friends_get(self, id, custom_perameters = None):
+    def friends_get(self, id, custom_perameters=None):
         method = 'friends.get'
         params = {
             'user_id': id,
@@ -225,7 +246,7 @@ class VkApiRequest(ApiRequest):
 
         return result['response']['items']
 
-    def wall_get_comments(self, owner_id, post_id, custom_perameters = None, limit = 0):
+    def wall_get_comments(self, owner_id, post_id, custom_perameters=None, limit=0):
         method = 'wall.getComments'
         params = {
             'owner_id': owner_id,
@@ -240,7 +261,7 @@ class VkApiRequest(ApiRequest):
         if 'count' in params:
             count = params['count']
 
-        result = self.__get_list(method, params, offset = 0, count = count, limit = limit)
+        result = self.__get_list(method, params, offset=0, count=count, limit=limit)
 
         if 'error' in result:
             return {'error': result['error']['error_msg']}
@@ -261,10 +282,10 @@ class VkApiRequest(ApiRequest):
                 p['attachments'] = []
 
 
-        return result       
+        return result
 
 
-    def likes_get_list(self, type, owner_id, item_id, custom_perameters = None, limit = 0):
+    def likes_get_list(self, type, owner_id, item_id, custom_perameters=None, limit=0):
         method = 'likes.getList'
         params = {
             'type': type,
@@ -279,15 +300,15 @@ class VkApiRequest(ApiRequest):
         if 'count' in params:
             count = params['count']
 
-        result = self.__get_list(method, params, offset = 0, count = count, limit = limit)
+        result = self.__get_list(method, params, offset=0, count=count, limit=limit)
 
         if 'error' in result:
             return {'error': result['error']['error_msg']}
 
 
-        return result     
-        
-    def users_get(self, ids, custom_perameters = None):
+        return result
+
+    def users_get(self, ids, custom_perameters=None):
         method = 'users.get'
         params = {
             'fields': 'education,contacts,nickname, screen_name, sex, bdate, city, country, timezone, photo_50, photo_100, photo_200, photo_max, has_mobile',
@@ -309,6 +330,42 @@ class VkApiRequest(ApiRequest):
                 return {'error': result['error']['error_msg']}
 
             result.extend(partial_result['response'])
+
+        return result
+
+    def newsfeed_search(self, q, custom_parameters=None, limit=0):
+        method = 'newsfeed.search'
+        params = {
+            'q': q,
+        }
+        if custom_parameters is not None:
+            params.update(custom_parameters)
+
+        count = 200
+        if 'count' in params:
+            count = params['count']
+
+        result = self.__get_list(method, params, offset=0, count=count, limit=limit)
+
+        if 'error' in result:
+            return {'error': result['error']['error_msg']}
+
+        # delete extra data
+        for p in result:
+            # set likes/comments/reposts count
+            p['comments_count'] = p['comments']['count']
+            p['likes_count'] = p['likes']['count']
+            p['reposts_count'] = p['reposts']['count']
+
+            p.pop('comments', None)
+            p.pop('likes', None)
+            p.pop('reposts', None)
+
+            # delete attachments but save links
+            if 'attachments' in p:
+                p['attachments'] = [a['link']['url'] for a in p['attachments'] if a['type'] == 'link']
+            else:
+                p['attachments'] = []
 
         return result
 
