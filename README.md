@@ -10,7 +10,7 @@ A cloud-powered high-perfomance system for data collection from social networks
   * `pip install -r SaveResultRole/requirements.txt`
 
 ## Usage
-Despite the fact that this system was designed to be runned in cloud enviromanent, it provides a script for a simple data collection with saving results to a file.
+Despite the fact that this system was designed to be runned in a cloud enviromanent, it provides a script for a simple data collection with saving results to a file.
 
 ### Simple data collection
 Run the following command in the folder with the system: `python collect_data.py --help` to see a short help.
