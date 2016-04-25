@@ -29,7 +29,7 @@ If the method requires several parameters, use `_` as the delimiter:
 >3_4  
 
 #### Methods
-As the current movent the following methods are supported:
+As the current moment the following methods are supported:
  * profiles
  * likes
  * walls
