@@ -253,7 +253,6 @@ class VkApiRequest(ApiRequest):
             'owner_id': owner_id,
             'post_id': post_id,
             'need_likes': 1,
-
         }
         if custom_perameters is not None:
             params.update(custom_perameters)

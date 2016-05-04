@@ -1,5 +1,6 @@
 ﻿import sys
 import click
+from datetime import datetime
 
 sys.path.insert(1, './CollectorRole/')
 sys.path.insert(1, './SaveResultRole/')
@@ -11,13 +12,11 @@ from FileWriter import FileWriter
 #########
 # Helpers
 #########
-def readlines(filename):
-    with open(filename, 'r') as f:
-        return readlines_handler(f)
-
-def readlines_handler(f):
-    return (cl for cl in (l.strip() for l in f.readlines()) if len(cl) > 0)
-
+def readlines(file_handle):
+    for l in file_handle:
+        cl = l.strip()
+        if len(cl) > 0:
+            yield cl
 
 def check_error(results):
     if isinstance(results, dict):
@@ -39,7 +38,7 @@ def main(ctx):
 @click.argument('output_dir', type=click.Path(exists=True, file_okay=False, dir_okay=True, writable=True))
 @click.argument('output_file')
 def profiles(input_file, output_dir, output_file):
-    ids = readlines_handler(input_file)
+    ids = readlines(input_file)
 
     task = {'method': 'users.get', 'input': ids, 'output_file': output_file}
 
@@ -55,7 +54,7 @@ def profiles(input_file, output_dir, output_file):
 @click.argument('input_file', type=click.File('r'))
 @click.argument('output_dir', type=click.Path(exists=True, file_okay=False, dir_okay=True, writable=True))
 def likes(input_file, output_dir):
-    ids = readlines_handler(input_file)
+    ids = readlines(input_file)
 
     task = {'method': 'likes.getList', 'input': {'type': '', 'owner_id': '', 'item_id':''}}
 
@@ -81,7 +80,7 @@ def likes(input_file, output_dir):
 @click.argument('input_file', type=click.File('r'))
 @click.argument('output_dir', type=click.Path(exists=True, file_okay=False, dir_okay=True, writable=True))
 def walls(input_file, output_dir):
-    ids = readlines_handler(input_file)
+    ids = readlines(input_file)
 
     task = {'method': 'wall.get', 'input': ''}
 
@@ -120,6 +119,44 @@ def search(query, output_dir, output_file):
 
     click.echo('All done!')
 
+
+@main.command('comments')
+@click.argument('input_file', type=click.File('r'))
+@click.argument('output_dir', type=click.Path(exists=True, file_okay=False, dir_okay=True, writable=True))
+def likes(input_file, output_dir):
+    ids = readlines(input_file)
+
+    task = {'method': 'wall.getComments', 'input': {'owner_id': '', 'post_id':''}}
+
+    api = VkApiRequest()
+    writer = FileWriter(output_dir)
+
+    i = 0
+    time_start = datetime.now()
+    time_prev = time_start
+    report_at = 64
+    for t in ids:
+        dt = t.split('_')
+        task['input']['owner_id'] = dt[0]
+        task['input']['post_id'] = dt[1]
+
+        results = api.wall_get_comments(task['input']['owner_id'], task['input']['post_id'])
+        if check_error(results):
+            continue
+        else:
+            writer.save_results(task, results)
+
+        i += 1
+        if i % report_at == 0:
+            time_now = datetime.now()
+            time_elapsed = time_now - time_prev
+            throuput = report_at / time_elapsed.seconds
+            print('Processed: {0} ({1:.2f}/sec)'.format(i, throuput))
+
+            time_prev = time_now
+
+    time_end = datetime.now()
+    click.echo('All done! Processed {0} items in {1}'.format(i, time_end - time_start))
 
 
 

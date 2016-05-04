@@ -76,7 +76,7 @@ class FileWriter(AbstractWriter):
             '|'.join(row['attachments'])
         ) for row in results]
 
-        filename = task['method'] + '_' + task['input']['owner_id'] + '_' + task['input']['post_id'] + '.csv'
+        filename = task['method'] + '_' + task['input']['owner_id'] + '.csv'
         self.__save_values(filename, task, values)
 
     def __save_likes_get_list(self, task, results):
