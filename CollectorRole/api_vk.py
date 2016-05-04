@@ -202,10 +202,11 @@ class VkApiRequest(ApiRequest):
 
         # delete extra data
         for p in result:
+
             # set likes/comments/reposts count
-            p['comments_count'] = p['comments']['count']
-            p['likes_count'] = p['likes']['count']
-            p['reposts_count'] = p['reposts']['count']
+            p['comments_count'] = p['comments']['count'] if 'comments' in p else 0
+            p['likes_count'] = p['likes']['count'] if 'likes' in p else 0
+            p['reposts_count'] = p['reposts']['count'] if 'reposts' in p else 0
 
             p.pop('comments', None)
             p.pop('likes', None)
@@ -353,9 +354,9 @@ class VkApiRequest(ApiRequest):
         # delete extra data
         for p in result:
             # set likes/comments/reposts count
-            p['comments_count'] = p['comments']['count']
-            p['likes_count'] = p['likes']['count']
-            p['reposts_count'] = p['reposts']['count']
+            p['comments_count'] = p['comments']['count'] if 'comments' in p else 0
+            p['likes_count'] = p['likes']['count'] if 'likes' in p else 0
+            p['reposts_count'] = p['reposts']['count'] if 'reposts' in p else 0
 
             p.pop('comments', None)
             p.pop('likes', None)
