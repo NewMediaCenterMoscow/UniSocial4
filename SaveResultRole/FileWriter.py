@@ -23,6 +23,8 @@ class FileWriter(AbstractWriter):
             'likes.getList': self.__save_likes_get_list,
             'users.get': self.__save_users_get,
             'newsfeed.search': self.__save_newsfeed_search,
+            'groups.get': self.__save_groups_get,
+            'groups.getById': self.__save_groups_get_by_id,
         }
 
     def __save_values(self, filename, task, values):
@@ -148,7 +150,49 @@ class FileWriter(AbstractWriter):
         self.__save_values(filename, task, values)
 
 
+    def __save_groups_get(self, task, results):
+        values = [(
+               task['input'],
+               row,
+        ) for row in results]
 
+        if 'output_file' in task:
+            filename = task['output_file']
+        else:
+            filename = task['method'] + '_' + task['input'] + '.csv'
+
+        self.__save_values(filename, task, values)
+
+
+    def __save_groups_get_by_id(self, task, results):
+        values = [(
+            row['id'],
+            row['name'],
+            row['screen_name'],
+            row['is_closed'],
+            True if 'deactivated' in row else False,
+            row['type'],
+            row.get('photo_50', ''),
+            row.get('photo_100', ''),
+            row.get('photo_200', ''),
+
+            row['city']['id'] if 'city' in row else '',
+            row['country']['id'] if 'country' in row else '',
+            row['place']['id'] if 'place' in row else '',
+
+            row.get('description', ''),
+            row.get('members_count', '-1'),
+            row.get('status', ''),
+            - 1 if 'verified' not in row else 1 if row['verified'] == 1 else 0,
+            row.get('site', ''),
+        ) for row in results]
+
+        if 'output_file' in task:
+            filename = task['output_file']
+        else:
+            filename = task['method'] + '_' + str(len(task['input'])) + '.csv'
+
+        self.__save_values(filename, task, values)
 
     def save_results(self, task, data):
         if isinstance(data, dict) and 'error' in data:

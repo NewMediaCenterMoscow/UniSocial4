@@ -98,13 +98,13 @@ class ApiRequest():
 
 
 class VkApiRequest(ApiRequest):
-    def __init__(self):
+    def __init__(self, access_token=None):
         ApiRequest.__init__(self, 'api.vk.com')
 
         self.__next_from_methods = ['newsfeed.search']
         self.__version = '5.27'
 
-
+        self.access_token = access_token
 
     def request(self, method, method_params, num_try=1, auth=None):
         if not method.startswith('/method/'):
@@ -369,3 +369,44 @@ class VkApiRequest(ApiRequest):
 
         return result
 
+
+    def groups_get(self, id, custom_parameters=None):
+        method = 'groups.get'
+        params = {
+            'user_id': id,
+        }
+        if custom_parameters is not None:
+            params.update(custom_parameters)
+
+        result = self.__get_list(method, params, offset=0, count=1000, auth=self.access_token)
+
+        if 'error' in result:
+            return {'error': result['error']['error_msg']}
+
+        return result
+
+
+    def groups_get_by_id(self, ids, custom_parameters=None):
+        method = 'groups.getById'
+        params = {
+            'fields': 'city, country, place, description, members_count, status, verified, site',
+        }
+        if custom_parameters is not None:
+            params.update(custom_parameters)
+
+        batch_size = 500
+        result = []
+
+        if not isinstance(ids, list):
+            ids = list(ids)
+
+        for ids_batch in self.__chunks(ids, batch_size):
+            params['group_ids'] = ','.join(ids_batch)
+            partial_result = self.request(method, params)
+
+            if 'error' in partial_result:
+                return {'error': result['error']['error_msg']}
+
+            result.extend(partial_result['response'])
+
+        return result
